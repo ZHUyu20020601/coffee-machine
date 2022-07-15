@@ -1,0 +1,77 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskLabel": "menuconfig",
+      "appliesTo": "*",
+      "type": "launch",
+      "inheritEnvironments": [
+        "linux_x64"
+      ],
+      "command": "idf_py_menuconfig.cmd"
+    },
+    {
+      "taskLabel": "flash",
+      "appliesTo": "*",
+      "type": "launch",
+      "inheritEnvironments": [
+        "linux_x64"
+      ],
+      "command": "idf.py",
+      "args": [
+        "-p ${env.FLASH_COM_PORT} flash"
+      ]
+    },
+    {
+      "taskLabel": "flash monitor",
+      "appliesTo": "*",
+      "type": "launch",
+      "inheritEnvironments": [
+        "linux_x64"
+      ],
+      "command": "idf.py",
+      "args": [
+        "flash monitor"
+      ]
+    },
+    {
+      "taskLabel": "monitor",
+      "appliesTo": "*",
+      "type": "launch",
+      "inheritEnvironments": [
+        "linux_x64"
+      ],
+      "command": "idf.py",
+      "args": [
+        "monitor"
+      ]
+    },
+    {
+      "taskName": "fullclean",
+      "appliesTo": "*",
+      "type": "launch",
+      "inheritEnvironments": [
+        "linux_x64"
+      ],
+      "command": "idf.py",
+      "args": [
+        "fullclean"
+      ]
+    },
+    {
+      "taskLabel": "任务-main",
+      "appliesTo": "main/main.c",
+      "type": "launch"
+    },
+    {
+      "taskLabel": "任务-main",
+      "appliesTo": "main/main.c",
+      "type": "launch"
+    },
+    {
+      "taskLabel": "任务-main",
+      "appliesTo": "main/main.c",
+      "type": "launch"
+    }
+  ]
+}

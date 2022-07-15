@@ -1,0 +1,52 @@
+﻿{
+  "configurations": [
+    {
+      "name": "ESP-IDF_4_3-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "linux_x64" ],
+      "buildRoot": "${projectDir}\\build",
+      "installRoot": "${projectDir}\\install",
+      "cmakeCommandArgs": "--warn-uninitialized",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "environments": [
+        {
+          "IDF_GIT_DIR": "D:\\Espressif\\tools\\idf-git\\2.34.2\\cmd",
+          "IDF_PATH": "D:\\ESP-IDF",
+          "IDF_TOOLS_PATH": "D:\\Espressif",
+          "IDF_PYTHON_DIR": "D:\\Espressif\\python_env\\idf4.3_py3.8_env\\Scripts",
+          "IDF_PYTHON_ENV_PATH": "${env.IDF_TOOLS_PATH}\\python_env\\idf4.3_py3.8_env",
+          "OPENOCD_SCRIPTS": "${env.IDF_TOOLS_PATH}\\tools\\openocd-esp32\\v0.10.0-esp32-20211111\\openocd-esp32\\share\\openocd\\scripts",
+          "PATH": "${env.IDF_TOOLS_PATH}\\tools\\xtensa-esp32-elf\\esp-2021r2-8.4.0\\xtensa-esp32-elf\\bin;${env.IDF_TOOLS_PATH}\\tools\\xtensa-esp32s2-elf\\esp-2021r2-8.4.0\\xtensa-esp32s2-elf\\bin;${env.IDF_TOOLS_PATH}\\tools\\esp32ulp-elf\\2.28.51-esp-20191205\\esp32ulp-elf-binutils\\bin;${env.IDF_TOOLS_PATH}\\tools\\esp32s2ulp-elf\\2.28.51-esp-20191205\\esp32s2ulp-elf-binutils\\bin;${env.IDF_TOOLS_PATH}\\tools\\ninja\\1.10.2\\;${env.IDF_TOOLS_PATH}\\tools\\idf-exe\\1.0.1\\;${env.IDF_TOOLS_PATH}\\tools\\ccache\\3.7\\;${env.IDF_TOOLS_PATH}\\python_env\\idf4.3_py3.8_env\\Scripts;${env.IDF_PATH}\\tools;${env.IDF_PATH};${env.PATH}",
+          "INCLUDE": "${env.IDF_TOOLS_PATH}\\tools\\xtensa-esp32-elf\\esp-2021r2-8.4.0\\xtensa-esp32-elf\\xtensa-esp32-elf\\include;${env.IDF_TOOLS_PATH}\\tools\\xtensa-esp32s2-elf\\esp-2021r2-8.4.0\\xtensa-esp32s2-elf\\xtensa-esp32s2-elf\\include;${env.IDF_PATH}\\components;${env.INCLUDE}",
+          "FLASH_COM_PORT": "COM5",
+          "environment": "linux_x64"
+        }
+      ],
+      "intelliSenseMode": "windows-clang-x64",
+      "variables": [
+        {
+          "name": "IDF_TARGET",
+          "value": "esp32",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_MAKE_PROGRAM",
+          "value": "${env.IDF_TOOLS_PATH}\\tools\\ninja\\1.10.2\\ninja.exe",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "CCACHE_ENABLE",
+          "value": "1",
+          "type": "STRING"
+        },
+        {
+          "name": "ESP_PLATFORM",
+          "value": "1",
+          "type": "STRING"
+        }
+      ]
+    }
+  ]
+}
