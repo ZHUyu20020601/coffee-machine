@@ -74,6 +74,10 @@ void mqtt_command_handler(const char* command)
         int sugar = cJSON_GetObjectItem(paras, "sugar")->valueint;
         ESP_LOGI(MQTT_TAG, "To STM32: Sugar %d ml", sugar);
     }
+    else if (strcmp(cmd_name, "set-target-temp") == 0) {
+        int temp = cJSON_GetObjectItem(paras, "temp")->valueint;
+        ESP_LOGI(MQTT_TAG, "To STM32: Temp %d Celsius", temp);
+    }
 }
 
 const char* find_char(const char* str, char c)
