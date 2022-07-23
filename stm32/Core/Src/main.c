@@ -27,6 +27,7 @@
 #include "stdio.h"
 #include "sensor.h"
 #include "func.h"
+#include "support.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
