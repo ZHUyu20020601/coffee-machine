@@ -27,6 +27,7 @@
 #include "stdio.h"
 #include "sensor.h"
 #include "func.h"
+#include "cJSON.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -167,6 +168,13 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+//printf to uart
+int fputc(int ch, FILE* f){
+	//transmit path to uart1
+	HAL_UART_Transmit(&huart1, (uint8_t*)&ch,1,100);
+	return ch;
+}
 
 
 //delay Usecond

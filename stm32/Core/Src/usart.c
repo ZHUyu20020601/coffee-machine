@@ -21,12 +21,7 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-//printf to uart
-int fputc(int ch, FILE* f){
-	//transmit path to uart1
-	HAL_UART_Transmit(&huart1, (uint8_t*)&ch,1,100);
-	return ch;
-}
+
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
