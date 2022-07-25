@@ -61,7 +61,7 @@ void SetStatusWaiting();
 
 ### 2.2 系统配置变量
 
-这个变量记录了最终咖啡的配料的比例和加热的温度，仅能在系统状态为==Waiting==下修改，可在任意状态下读取。
+这个变量记录了最终咖啡的配料的比例和加热的温度，仅能在系统状态为==Waiting==下修改，可在任意状态下读取。在非==Waiting==状态下修改的是tempCfg的参数，并且会在指定时刻加入到buf队列中。
 
 ```c
 typedef enum {coffee, sugar, milk, temp} cfg_property;
@@ -71,16 +71,30 @@ typedef struct {
 	uint8_t milk;	// 牛奶的加入量
 	uint8_t temp;	// 设定的加热温度
 } SystemCfg;
+typedef struct{
+    SystemCfg buffer[5];
+    int rear;
+}SystemCfgBuffer;
+
+static SystemCfg SystemCurrentCfg;
+static SystemCfg tempCfg;
+static SystemCfgBuffer buf;
 ```
 
-使用以下一组函数对该配置进行更改
+使用以下函数对该配置进行设定，其中第一个参数可以在==coffee==,==sugar==,==milk==,==temp==中选择。
 
 ```c
-uint8_t SetCfg(cfg_property, uint8_t);
-uint8_t GetCfg(cfg_property);
+void SetNextCfg(cfg_property, uint8_t);
 ```
 
-其中第一个参数可以在==coffee==,==sugar==,==milk==,==temp==中选择。
+使用以下函数加载配置和读取配置
+
+```c
+void SetCurrentCfg(void)
+uint8_t GetCurrentCfg(cfg_property);
+```
+
+
 
 ### 2.3 STM32与ESP32通信协议约定
 
@@ -247,7 +261,7 @@ uint8_t GetCfg(cfg_property);
 2. 如果是"Making"状态，将该命令存入一个命令队列中
 3. 当系统状态恢复成"Waiting"时，按次序执行该任务队列里的全部任务
 
-这个机制已经封装在[SetCfg()](###2.2 系统配置变量)函数中，直接调用即可。
+这个机制已经封装在[SetNextCfg()](###2.2 系统配置变量)函数中，直接调用即可。
 
 ## 3 程序架构与算法
 
@@ -257,7 +271,7 @@ uint8_t GetCfg(cfg_property);
 
 ---
 
-编辑于2022/7/23
+编辑于2022/7/25
 
 
 

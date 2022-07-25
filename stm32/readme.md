@@ -1,4 +1,12 @@
-GPIO
+<center><h2>
+    咖啡机程序设计说明
+    </h2></center>
+
+<center>SMX、SJY、ZY</center>
+
+### 芯片接口功能定义
+
+1. GPIO
 
 |   加料传感器   | 接口 |
 | :------------: | :--: |
@@ -8,8 +16,6 @@ GPIO
 |   milk_echo    | PA2  |
 | sugar_trigger  | PA4  |
 |   sugar_echo   | PA5  |
-
-
 
 
 
@@ -23,7 +29,7 @@ GPIO
 
 
 
-UART
+2. UART
 
 |         功能         | 接口 | 波特率 |
 | :------------------: | :--: | :----: |
@@ -38,19 +44,19 @@ UART
 
 
 
-FUNCTIONS
+### 文件结构设计
 
-|               接口               |               功能               | 文件.h |
-| :------------------------------: | :------------------------------: | :----: |
-|          `printf(...)`           |  已修改，输出到uart1，方便debug  | stdio  |
-| `void HAL_Delay_us(uint32_t us)` |             微秒延时             |  main  |
-|    `float get_coffee_dist()`     |     输出coffee探头测得的距离     | sensor |
-|       milk、sugar接口类似        |                /                 | sensor |
-|     `void shut_all_relay()`      |    所有继电器输出高电平，阻塞    |  func  |
-|  `void add_coffee(uint8_t ml)`   | 加咖啡，单位毫升，需要知道底面积 |  func  |
-|       milk、sugar接口类似        |                /                 |  func  |
-|              mix...              |                                  |        |
-|             heat...              |                                  |        |
+脚本文件存储在`./stm32/MDK-ARM/coffee-machine/Core/{Inc, Rec}`下，部分文件由cubemx生成，仅做少量修改，我们自定义的文件包括：
+
+- `sensor.h/.c` 定义了传感器读取距离
+- `func.h/.c `定义了调用传感器数据、控制搅拌器、控制加热器的函数
+- `sys.h/.c `定义了系统状态机
+- `connect.h/.c`定义通信
+- `main.h/.c`定义主函数
+
+
+
+
 
 
 
