@@ -26,6 +26,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
+#include "string.h"
+#include "stdlib.h"
 #include "sensor.h"
 #include "func.h"
 #include "sys.h"
@@ -115,6 +117,15 @@ int main(void)
 	
 	my_uart1_enable_interrupt();
 	
+	cJSON* cjson = cJSON_CreateObject();
+	cJSON_AddStringToObject(cjson, "type", "json");
+	cJSON_AddNumberToObject(cjson, "length", 100);
+	cJSON* content = cJSON_CreateObject();
+	cJSON_AddNumberToObject(content, "contentA", 1);
+	cJSON_AddStringToObject(content, "contentB", "str");
+	cJSON_AddItemToObject(cjson, "content", content);
+	char* json_str = cJSON_Print(cjson);
+	
   while (1)
   {
 		/*µ„¡¡led≤‚ ‘
@@ -135,6 +146,13 @@ int main(void)
 		printf("distance is %.2f cm.\r\n",dist);
 		HAL_Delay(1000);
 		*/
+		
+		//cJSON≤‚ ‘
+		//my_uart1_send_string((uint8_t*)json_str);
+		//my_uart1_send_data((uint8_t*)json_str, strlen(json_str));
+		//printf(json_str);
+		//cJSON_Print(cjson);
+		//HAL_Delay(100);
 		
     /* USER CODE END WHILE */
 
