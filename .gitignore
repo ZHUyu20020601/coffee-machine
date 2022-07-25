@@ -2,7 +2,9 @@
 */build/
 stm32/MDK-ARM/coffee_machine/
 stm32/MDK-ARM/RTE/
+stm32/MDK-ARM/DebugConfig/
 stm32/MDK-ARM/*.ZHUYU
+stm32/MDK-ARM/*.SONG
 stm32/MDK-ARM/*.uvoptx
 stm32/MDK-ARM/*.lst
 
