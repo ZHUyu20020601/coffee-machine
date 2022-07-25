@@ -27,6 +27,7 @@
 #include "stdio.h"
 #include "sensor.h"
 #include "func.h"
+#include "sys.h"
 #include "cJSON.h"
 /* USER CODE END Includes */
 

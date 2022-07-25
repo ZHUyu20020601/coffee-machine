@@ -34,4 +34,5 @@ coffee_machine\main.o: ../Core/Inc/gpio.h
 coffee_machine\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 coffee_machine\main.o: ../Core/Inc/sensor.h
 coffee_machine\main.o: ../Core/Inc/func.h
+coffee_machine\main.o: ../Core/Inc/sys.h
 coffee_machine\main.o: ../Core/Inc/cJSON.h
