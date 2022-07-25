@@ -29,3 +29,8 @@ coffee_machine\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal
 coffee_machine\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 coffee_machine\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 coffee_machine\stm32f1xx_it.o: ../Core/Inc/stm32f1xx_it.h
+coffee_machine\stm32f1xx_it.o: ../Core/Inc/connect.h
+coffee_machine\stm32f1xx_it.o: ../Core/Inc/usart.h
+coffee_machine\stm32f1xx_it.o: ../Core/Inc/cJSON.h
+coffee_machine\stm32f1xx_it.o: ../Core/Inc/sys.h
+coffee_machine\stm32f1xx_it.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h

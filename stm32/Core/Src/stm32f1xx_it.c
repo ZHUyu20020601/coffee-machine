@@ -22,6 +22,9 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "connect.h"
+#include "sys.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,6 +65,9 @@ extern DMA_HandleTypeDef hdma_usart1_rx;
 extern UART_HandleTypeDef huart1;
 /* USER CODE BEGIN EV */
 
+extern uint8_t rx_buffer[200];   //接收数据的数组
+extern volatile uint8_t rx_len; //接收数据的长度
+extern volatile uint8_t recv_end_flag; //接收结束标志位
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -268,6 +274,24 @@ void USART1_IRQHandler(void)
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
+	uint8_t tmp_flag =__HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE); //获取IDLE状态
+	if((tmp_flag != RESET))//判断接收是否结束
+		{ 
+      // recv_end_flag = 1; //接收结束
+      __HAL_UART_CLEAR_IDLEFLAG(&huart1);//清除标志位
+			
+      HAL_UART_DMAStop(&huart1); 
+			
+      uint8_t temp=__HAL_DMA_GET_COUNTER(&hdma_usart1_rx);    
+			
+      rx_len =200-temp; //计算数据长度
+			
+      HAL_UART_Transmit_DMA(&huart1, rx_buffer,rx_len);//发送数据
+			parse_msg(rx_buffer);
+			
+			uart1_start_dma();
+     //HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//开启DMA
+		}
 
   /* USER CODE END USART1_IRQn 1 */
 }

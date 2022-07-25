@@ -31,5 +31,6 @@ coffee_machine\connect.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.
 coffee_machine\connect.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 coffee_machine\connect.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 coffee_machine\connect.o: ../Core/Inc/cJSON.h
+coffee_machine\connect.o: ../Core/Inc/sys.h
 coffee_machine\connect.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 coffee_machine\connect.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h

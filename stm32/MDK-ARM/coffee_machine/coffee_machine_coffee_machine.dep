@@ -98,8 +98,8 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x62D0DC04)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x62D0DC04)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x599ECD2C)
 F (..\Core\Inc\sys.h)(0x62DE2B96)()
-F (..\Core\Src\connect.c)(0x62DE59C0)(--c99 -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_coffee_machine-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\1.0.5\Device\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F10X_HD -DUSE_HAL_DRIVER -DSTM32F103xE-o coffee_machine\connect.o --omf_browse coffee_machine\connect.crf --depend coffee_machine\connect.d)
-I (../Core/Inc/connect.h)(0x62DE5A03)
+F (..\Core\Src\connect.c)(0x62DE980A)(--c99 -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_coffee_machine-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\1.0.5\Device\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F10X_HD -DUSE_HAL_DRIVER -DSTM32F103xE-o coffee_machine\connect.o --omf_browse coffee_machine\connect.crf --depend coffee_machine\connect.d)
+I (../Core/Inc/connect.h)(0x62DE963A)
 I (../Core/Inc/usart.h)(0x62DDFD10)
 I (../Core/Inc/main.h)(0x62DA3D65)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x62D0DC04)
@@ -130,10 +130,11 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h)(0x62D0DC04)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x62D0DC04)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x62D0DC04)
 I (../Core/Inc/cJSON.h)(0x62DCD4AC)
+I (../Core/Inc/sys.h)(0x62DE2B96)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x599ECD2C)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x599ECD2C)
-F (..\Core\Inc\connect.h)(0x62DE5A03)()
-F (../Core/Src/main.c)(0x62DE876B)(--c99 -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_coffee_machine-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\1.0.5\Device\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F10X_HD -DUSE_HAL_DRIVER -DSTM32F103xE-o coffee_machine\main.o --omf_browse coffee_machine\main.crf --depend coffee_machine\main.d)
+F (..\Core\Inc\connect.h)(0x62DE963A)()
+F (../Core/Src/main.c)(0x62DE9755)(--c99 -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_coffee_machine-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\1.0.5\Device\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F10X_HD -DUSE_HAL_DRIVER -DSTM32F103xE-o coffee_machine\main.o --omf_browse coffee_machine\main.crf --depend coffee_machine\main.d)
 I (../Core/Inc/main.h)(0x62DA3D65)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x62D0DC04)
 I (../Core/Inc/stm32f1xx_hal_conf.h)(0x62DE3E79)
@@ -172,7 +173,7 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x599ECD2C)
 I (../Core/Inc/sensor.h)(0x62D8A852)
 I (../Core/Inc/func.h)(0x62D8BDEF)
 I (../Core/Inc/sys.h)(0x62DE2B96)
-I (../Core/Inc/connect.h)(0x62DE5A03)
+I (../Core/Inc/connect.h)(0x62DE963A)
 I (../Core/Inc/cJSON.h)(0x62DCD4AC)
 F (../Core/Src/gpio.c)(0x62DA3603)(--c99 -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_coffee_machine-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\1.0.5\Device\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F10X_HD -DUSE_HAL_DRIVER -DSTM32F103xE-o coffee_machine\gpio.o --omf_browse coffee_machine\gpio.crf --depend coffee_machine\gpio.d)
 I (../Core/Inc/gpio.h)(0x62D179DA)
@@ -264,7 +265,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h)(0x62D0DC04)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h)(0x62D0DC04)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x62D0DC04)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x62D0DC04)
-F (../Core/Src/usart.c)(0x62DE3E78)(--c99 -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_coffee_machine-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\1.0.5\Device\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F10X_HD -DUSE_HAL_DRIVER -DSTM32F103xE-o coffee_machine\usart.o --omf_browse coffee_machine\usart.crf --depend coffee_machine\usart.d)
+F (../Core/Src/usart.c)(0x62DE9755)(--c99 -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_coffee_machine-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\1.0.5\Device\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F10X_HD -DUSE_HAL_DRIVER -DSTM32F103xE-o coffee_machine\usart.o --omf_browse coffee_machine\usart.crf --depend coffee_machine\usart.d)
 I (../Core/Inc/usart.h)(0x62DDFD10)
 I (../Core/Inc/main.h)(0x62DA3D65)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x62D0DC04)
@@ -294,7 +295,8 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h)(0x62D0DC04)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h)(0x62D0DC04)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x62D0DC04)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x62D0DC04)
-F (../Core/Src/stm32f1xx_it.c)(0x62DE3E79)(--c99 -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_coffee_machine-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\1.0.5\Device\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F10X_HD -DUSE_HAL_DRIVER -DSTM32F103xE-o coffee_machine\stm32f1xx_it.o --omf_browse coffee_machine\stm32f1xx_it.crf --depend coffee_machine\stm32f1xx_it.d)
+I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x599ECD2C)
+F (../Core/Src/stm32f1xx_it.c)(0x62DE980A)(--c99 -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_coffee_machine-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\1.0.5\Device\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F10X_HD -DUSE_HAL_DRIVER -DSTM32F103xE-o coffee_machine\stm32f1xx_it.o --omf_browse coffee_machine\stm32f1xx_it.crf --depend coffee_machine\stm32f1xx_it.d)
 I (../Core/Inc/main.h)(0x62DA3D65)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x62D0DC04)
 I (../Core/Inc/stm32f1xx_hal_conf.h)(0x62DE3E79)
@@ -324,6 +326,11 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h)(0x62D0DC04)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x62D0DC04)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x62D0DC04)
 I (../Core/Inc/stm32f1xx_it.h)(0x62DE3E79)
+I (../Core/Inc/connect.h)(0x62DE963A)
+I (../Core/Inc/usart.h)(0x62DDFD10)
+I (../Core/Inc/cJSON.h)(0x62DCD4AC)
+I (../Core/Inc/sys.h)(0x62DE2B96)
+I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x599ECD2C)
 F (../Core/Src/stm32f1xx_hal_msp.c)(0x62DA4406)(--c99 -c --cpu Cortex-M3 -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_coffee_machine-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include-IC:\Users\ZHUYU\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\1.0.5\Device\Include-D__UVISION_VERSION="527" -D_RTE_ -DSTM32F10X_HD -DUSE_HAL_DRIVER -DSTM32F103xE-o coffee_machine\stm32f1xx_hal_msp.o --omf_browse coffee_machine\stm32f1xx_hal_msp.crf --depend coffee_machine\stm32f1xx_hal_msp.d)
 I (../Core/Inc/main.h)(0x62DA3D65)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x62D0DC04)

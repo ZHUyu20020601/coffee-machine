@@ -9,17 +9,18 @@ ZHUYU
 
 #include "usart.h"
 #include "cJSON.h"
+#include "sys.h"
 
 
 /*串口通信*/
 //发送数据
-void my_uart1_send_data(uint8_t *tdata,uint16_t tnum);
-void my_uart1_send_string(uint8_t *tdata);
+void uart1_send_data(uint8_t *tdata,uint16_t tnum);
+void uart1_send_string(uint8_t *tdata);
 //开启中断
-void my_uart1_enable_interrupt(void);
-//中断回调
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+void uart1_start_dma(void);
 
+//处理串口接收到的字符串
+void parse_msg(uint8_t* msg);
 
 #endif
 

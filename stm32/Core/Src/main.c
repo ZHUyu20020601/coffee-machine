@@ -63,6 +63,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+extern uint8_t rx_buffer[200];   //接收数据的数组
 
 /* USER CODE END 0 */
 
@@ -101,6 +102,10 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+	
+	__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //开启空闲中断
+	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);  //开启DMA接收中断
+
 	//ensure all relays are shut
 	//shut_all_relay();
   /* USER CODE END 2 */
@@ -115,7 +120,7 @@ int main(void)
 	//HAL_Delay(100);
 	
 	
-	my_uart1_enable_interrupt();
+	//my_uart1_enable_interrupt();
 	
 	cJSON* cjson = cJSON_CreateObject();
 	cJSON_AddStringToObject(cjson, "type", "json");
@@ -202,12 +207,7 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-//printf to uart
-int fputc(int ch, FILE* f){
-	//transmit path to uart1
-	HAL_UART_Transmit(&huart1, (uint8_t*)&ch,1,100);
-	return ch;
-}
+
 
 
 //delay Usecond
