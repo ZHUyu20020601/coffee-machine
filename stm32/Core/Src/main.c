@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -28,6 +29,7 @@
 #include "sensor.h"
 #include "func.h"
 #include "sys.h"
+#include "connect.h"
 #include "cJSON.h"
 /* USER CODE END Includes */
 
@@ -90,6 +92,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USART3_UART_Init();
@@ -103,11 +106,14 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	
-	float dist = 0;;
-	dist = get_coffee_dist();
+	//float dist = 0;;
+	//dist = get_coffee_dist();
 	//uint32_t n = 0;
-	HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
-	HAL_Delay(100);
+	//HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
+	//HAL_Delay(100);
+	
+	
+	my_uart1_enable_interrupt();
 	
   while (1)
   {
@@ -118,9 +124,17 @@ int main(void)
 		HAL_Delay(100);
 		*/
 		
+		//my_uart1_send_string("test123\r\n");
+		//HAL_Delay(10);
+		
+		//my_uart1_enable_interrupt();
+		//HAL_UART_RxCpltCallback(&huart1);
+		
+		/*
 		dist = get_sugar_dist();
 		printf("distance is %.2f cm.\r\n",dist);
 		HAL_Delay(1000);
+		*/
 		
     /* USER CODE END WHILE */
 
