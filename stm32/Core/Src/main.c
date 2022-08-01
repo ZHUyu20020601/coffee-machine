@@ -94,8 +94,9 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_DMA_Init();
+	MX_DMA_Init();
+	MX_GPIO_Init();
+  
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USART3_UART_Init();
@@ -122,24 +123,13 @@ int main(void)
 	
 	//my_uart1_enable_interrupt();
 	
-	cJSON* cjson = cJSON_CreateObject();
-	cJSON_AddStringToObject(cjson, "type", "json");
-	cJSON_AddNumberToObject(cjson, "length", 100);
-	cJSON* content = cJSON_CreateObject();
-	cJSON_AddNumberToObject(content, "contentA", 1);
-	cJSON_AddStringToObject(content, "contentB", "str");
-	cJSON_AddItemToObject(cjson, "content", content);
-	char* json_str = cJSON_Print(cjson);
+	
+	InitSystem();
 	
   while (1)
   {
-		/*µ„¡¡led≤‚ ‘
-		HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
-		HAL_Delay(100);
-		HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
-		HAL_Delay(100);
-		*/
 		
+	
 		//my_uart1_send_string("test123\r\n");
 		//HAL_Delay(10);
 		

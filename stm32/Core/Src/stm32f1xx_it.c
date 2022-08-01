@@ -68,6 +68,7 @@ extern UART_HandleTypeDef huart1;
 extern uint8_t rx_buffer[200];   //接收数据的数组
 extern volatile uint8_t rx_len; //接收数据的长度
 extern volatile uint8_t recv_end_flag; //接收结束标志位
+//extern uint8_t rx_log[30];
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -286,8 +287,13 @@ void USART1_IRQHandler(void)
 			
       rx_len =200-temp; //计算数据长度
 			
-      HAL_UART_Transmit_DMA(&huart1, rx_buffer,rx_len);//发送数据
-			parse_msg(rx_buffer);
+      //HAL_UART_Transmit_DMA(&huart1, rx_buffer,rx_len);//发送数据
+			
+			//HAL_UART_Transmit_DMA(&huart1, "recieved msg\n", 14);
+			
+			parse_msg(rx_buffer);//处理接受到的数据
+			
+			//HAL_UART_Transmit_DMA(&huart1, rx_log, 14);
 			
 			uart1_start_dma();
      //HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//开启DMA

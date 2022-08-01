@@ -14,13 +14,25 @@ ZHUYU
 
 /*串口通信*/
 //发送数据
+//不要再中断函数中使用！！
 void uart1_send_data(uint8_t *tdata,uint16_t tnum);
 void uart1_send_string(uint8_t *tdata);
+
+
 //开启中断
 void uart1_start_dma(void);
 
+
 //处理串口接收到的字符串
+//分析命令类型，转到具体处理函数
 void parse_msg(uint8_t* msg);
+
+//参数设定
+void set_cfg(char* variable, uint8_t value);
+
+//参数查询
+void req_cfg(char* variable);
+
 
 #endif
 
