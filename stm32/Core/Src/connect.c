@@ -14,6 +14,9 @@ uint8_t rx_log[50];   //日志数组
 volatile uint8_t rx_len = 0; //接收数据的长度
 volatile uint8_t recv_end_flag = 0; //接收结束标志位
 
+
+
+
 //不要再中断函数中使用！！
 void uart1_send_string(uint8_t *tdata){
 	//等待发送状态OK
@@ -38,6 +41,9 @@ void uart1_start_dma(void){
 
 
 /*
+FUNCTION:
+解析收到的对象，作相应的操作
+
 ATTENTION:
 1.中断函数中不能写printf和malloc
 2.cJson_Delete必须写在最后，如果写在前面会导致条件判断结果出错，原因不明
@@ -46,9 +52,10 @@ ATTENTION:
 void parse_msg(uint8_t* msg){
 		
 		
-	cJSON* obj = cJSON_Parse((char*)msg);
+	cJSON* obj = cJSON_Parse((char*)msg);//解析对象
 	
-	char* type = cJSON_GetObjectItem(obj, "type")->valuestring;
+	char* type = cJSON_GetObjectItem(obj, "type")->valuestring;//分析命令类型
+	uint8_t id = cJSON_GetObjectItem(obj, "id")->valueint;//解析命令号码
 	
 	
 	//判断是否为command
@@ -58,19 +65,28 @@ void parse_msg(uint8_t* msg){
 		char* variable = cJSON_GetObjectItem(command, "variable")->valuestring;
 		uint8_t value = cJSON_GetObjectItem(command, "value")->valueint;
 		
-		set_cfg(variable, value);
+		set_cfg(variable, value, id);
 		
 		
 	}
 	
-	
+	//判断是否为request
 	if( strcmp(type, "request") == 0){
 		char* variable = cJSON_GetObjectItem(obj, "variable")->valuestring;
-		req_cfg(variable);
+		req_cfg(variable, id);
 		
 		
 	}
 	
+	//判断是否为start
+	if( strcmp(type, "start") == 0){
+		start(id);
+	}
+	
+	//判断是否为emergent stop
+	if( strcmp(type, "emergent stop") == 0){
+		emergent_stop(id);
+	}
 
 	
 	cJSON_Delete(obj);
@@ -79,7 +95,9 @@ void parse_msg(uint8_t* msg){
 }
 
 
-void set_cfg(char* variable, uint8_t value){
+void set_cfg(char* variable, uint8_t value, uint8_t id){
+	
+	char* msg = NULL;
 	
 		/*对tempCfg进行修改，并放入队列中*/
 	if(strcmp(variable, "coffee") == 0)
@@ -90,19 +108,27 @@ void set_cfg(char* variable, uint8_t value){
 		SetNextCfg(sugar, value);
 	if(strcmp(variable,"temp") == 0)
 		SetNextCfg(temp, value);
+	if(strcmp(variable, "addbuf") == 0)
+			msg = AddBuffer();
 		
-	AddBuffer();
+		
+	//AddBuffer();
 	
 	
-	SetCurrentCfg();
+	//SetCurrentCfg();
+	//sprintf(rx_log, "already set!\ncoffee, milk, sugar, temp = %d, %d, %d, %d\r\n", GetCurrentCfg(coffee),GetCurrentCfg(milk), GetCurrentCfg(sugar), GetCurrentCfg(temp));
 	
-	sprintf(rx_log, "already set!\ncoffee, milk, sugar, temp = %d, %d, %d, %d\r\n", GetCurrentCfg(coffee),GetCurrentCfg(milk), GetCurrentCfg(sugar), GetCurrentCfg(temp));
-	HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
+	if(msg == NULL)
+		response_ok(id);
+	else
+		response_error(id, msg);
+	
+	//HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
 	
 }
 
-
-void req_cfg(char* variable){
+//只在start过后才有效，读取的是currentCfg，不能获得buf中的内容
+void req_cfg(char* variable, uint8_t id){
 	uint8_t value;
 	
 	if(strcmp(variable, "coffee") == 0)
@@ -114,10 +140,160 @@ void req_cfg(char* variable){
 	if(strcmp(variable,"temp") == 0)
 		value = GetCurrentCfg(temp);
 	
-	sprintf(rx_log, "value of %s is %d\n", variable, value);
-	HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
+	//sprintf(rx_log, "value of %s is %d\n", variable, value);
+	//HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
+	
+	response_request(id, variable, value);
 	
 }
 
 
+void start(uint8_t id){
+	//response_ok(id);
+	
+	//读取队列中的参数
+	char* msg = SetCurrentCfg();
+	
+	if(msg != NULL){
+		response_error(id, msg);
+		return;
+	}
+	
+	
+	SetStatusMaking();
+	/*
+	在这里加入制作咖啡机的进程代码
+	*/
+	SetStatusWaiting();
+	
+	response_status(id);
+	
+	
+}
+
+void emergent_stop(uint8_t id){
+	SetStatusError();
+	/*
+	在这里加入咖啡机紧急停机的代码
+	*/
+	response_status(id);
+}
+
+
+
+/*----返回----*/
+void response_ok(uint8_t id){
+	//生成目标对象
+	cJSON* cjson = cJSON_CreateObject();
+	cJSON_AddStringToObject(cjson, "type", "response");
+	cJSON_AddNumberToObject(cjson, "id", id);
+	
+	cJSON* response = cJSON_CreateObject();
+	cJSON_AddNumberToObject(response, "status", 0);
+	cJSON_AddStringToObject(response, "msg", "command execute successfully");
+	
+	cJSON_AddItemToObject(cjson, "result", response);
+	
+	//传递给log字符串
+	strcpy(rx_log, cJSON_Print(cjson));
+	
+	//销毁对象
+	cJSON_Delete(cjson);
+	
+	//发送
+	HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
+}
+
+
+void response_making(uint8_t id){
+		//生成目标对象
+	cJSON* cjson = cJSON_CreateObject();
+	cJSON_AddStringToObject(cjson, "type", "response");
+	cJSON_AddNumberToObject(cjson, "id", id);
+	
+	cJSON* response = cJSON_CreateObject();
+	cJSON_AddNumberToObject(response, "status", 1);
+	cJSON_AddStringToObject(response, "msg", "waiting for finishing");
+	
+	cJSON_AddItemToObject(cjson, "result", response);
+	
+	//传递给log字符串
+	strcpy(rx_log, cJSON_Print(cjson));
+	
+	//销毁对象
+	cJSON_Delete(cjson);
+	
+	//发送
+	HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
+}
+
+
+void response_error(uint8_t id, char* msg){
+	//生成目标对象
+	cJSON* cjson = cJSON_CreateObject();
+	cJSON_AddStringToObject(cjson, "type", "response");
+	cJSON_AddNumberToObject(cjson, "id", id);
+	
+	cJSON* response = cJSON_CreateObject();
+	cJSON_AddNumberToObject(response, "status", 2);
+	cJSON_AddStringToObject(response, "msg", msg);
+	
+	cJSON_AddItemToObject(cjson, "result", response);
+	
+	//传递给log字符串
+	strcpy(rx_log, cJSON_Print(cjson));
+	
+	//销毁对象
+	cJSON_Delete(cjson);
+	
+	//发送
+	HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
+}
+
+void response_request(uint8_t id, char* variable, uint8_t value){
+	//生成目标对象
+	cJSON* cjson = cJSON_CreateObject();
+	cJSON_AddStringToObject(cjson, "type", "variable");
+	cJSON_AddNumberToObject(cjson, "id", id);
+	
+	cJSON* response = cJSON_CreateObject();
+	cJSON_AddStringToObject(response, "variable", variable);
+	cJSON_AddNumberToObject(response, "value", value);
+	
+	cJSON_AddItemToObject(cjson, "result", response);
+	
+	//传递给log字符串
+	strcpy(rx_log, cJSON_Print(cjson));
+	
+	//销毁对象
+	cJSON_Delete(cjson);
+	
+	//发送
+	HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
+	
+}
+
+void response_status(uint8_t id){
+	//生成目标对象
+	cJSON* cjson = cJSON_CreateObject();
+	cJSON_AddStringToObject(cjson, "type", "status");
+	cJSON_AddNumberToObject(cjson, "id", id);
+	
+	if(GetSystemStatus() == Waiting)
+		cJSON_AddStringToObject(cjson, "status", "waiting");
+	else if(GetSystemStatus() == Making)
+		cJSON_AddStringToObject(cjson, "status", "making");
+	else
+		cJSON_AddStringToObject(cjson, "status", "error");
+
+	
+	//传递给log字符串
+	strcpy(rx_log, cJSON_Print(cjson));
+	
+	//销毁对象
+	cJSON_Delete(cjson);
+	
+	//发送
+	HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
+}
 

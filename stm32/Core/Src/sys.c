@@ -52,22 +52,23 @@ void SetNextCfg(cfg_property property, uint8_t value){
 		tempCfg.temp = value;
 }
 
-void AddBuffer(void){
+char* AddBuffer(void){
 	if(buf.rear < 5){
 		buf.buffer[buf.rear] = tempCfg;
 		buf.rear++;
 	}else{
-		printf("buf full\r\n");
+		return "buf full!";
 	}
+	return NULL;
 }
 
 
-void SetCurrentCfg(void){
+char* SetCurrentCfg(void){
 	int i = 0;
 	//如果处于等待状态，直接读取
 	if(Waiting == GetSystemStatus()){
 		if(buf.rear == 0)
-			printf("buf empty\r\n");
+			return "buf empty!";
 		else{
 			SystemCurrentCfg = buf.buffer[0];
 			for(;i < buf.rear ; i++){
@@ -77,6 +78,7 @@ void SetCurrentCfg(void){
 		}
 	}
 	//如果处于工作状态则什么都不做
+	return NULL;
 }
 
 
@@ -89,5 +91,11 @@ uint8_t GetCurrentCfg(cfg_property property){
 		return SystemCurrentCfg.sugar;
 	if(property == temp)
 		return SystemCurrentCfg.temp;
+	return 0;
+}
+
+int buf_empty(void){
+	if(buf.rear == 0)
+		return 1;
 	return 0;
 }

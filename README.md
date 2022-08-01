@@ -162,7 +162,7 @@ uint8_t GetCurrentCfg(cfg_property);
        "type": "command",
        "id": 0,
        "command": {
-           "variable": "coffee/sugar/milk/temp",
+           "variable": "coffee/sugar/milk/temp/addbuf",
            "value": 0
        }
    }
