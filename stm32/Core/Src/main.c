@@ -65,7 +65,7 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-extern uint8_t rx_buffer[200];   //½ÓÊÕÊı¾İµÄÊı×é
+extern uint8_t rx_buffer[200];   //æ¥æ”¶æ•°æ®çš„æ•°ç»„
 
 /* USER CODE END 0 */
 
@@ -105,8 +105,8 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 	
-	__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //¿ªÆô¿ÕÏĞÖĞ¶Ï
-	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);  //¿ªÆôDMA½ÓÊÕÖĞ¶Ï
+	__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //å¼€å¯ç©ºé—²ä¸­æ–­
+	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);  //å¼€å¯DMAæ¥æ”¶ä¸­æ–­
 
 	//ensure all relays are shut
 	//shut_all_relay();
@@ -151,7 +151,7 @@ int main(void)
 		HAL_Delay(1000);
 		*/
 		
-		//cJSON²âÊÔ
+		//cJSONæµ‹è¯•
 		//my_uart1_send_string((uint8_t*)json_str);
 		//my_uart1_send_data((uint8_t*)json_str, strlen(json_str));
 		//printf(json_str);

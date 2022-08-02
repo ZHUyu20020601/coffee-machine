@@ -1,7 +1,7 @@
 /*
 ZHUYU
 2022/7/25
-´®¿ÚÍ¨ĞÅ
+ä¸²å£é€šä¿¡
 */
 
 #ifndef __CONNECT_H
@@ -12,40 +12,40 @@ ZHUYU
 #include "sys.h"
 
 
-/*´®¿ÚÍ¨ĞÅ*/
-//·¢ËÍÊı¾İ
-//²»ÒªÔÙÖĞ¶Ïº¯ÊıÖĞÊ¹ÓÃ£¡£¡
+/*ä¸²å£é€šä¿¡*/
+//å‘é€æ•°æ®
+//ä¸è¦å†ä¸­æ–­å‡½æ•°ä¸­ä½¿ç”¨ï¼ï¼
 void uart1_send_data(uint8_t *tdata,uint16_t tnum);
 void uart1_send_string(uint8_t *tdata);
 
 
-//¿ªÆôÖĞ¶Ï
+//å¼€å¯ä¸­æ–­
 void uart1_start_dma(void);
 
 
 
-/*ÒµÎñº¯Êı*/
-//´¦Àí´®¿Ú½ÓÊÕµ½µÄ×Ö·û´®
-//·ÖÎöÃüÁîÀàĞÍ£¬×ªµ½¾ßÌå´¦Àíº¯Êı£¨ÏÂÁĞ1.2.3.4£©
+/*ä¸šåŠ¡å‡½æ•°*/
+//å¤„ç†ä¸²å£æ¥æ”¶åˆ°çš„å­—ç¬¦ä¸²
+//åˆ†æå‘½ä»¤ç±»å‹ï¼Œè½¬åˆ°å…·ä½“å¤„ç†å‡½æ•°ï¼ˆä¸‹åˆ—1.2.3.4ï¼‰
 void parse_msg(uint8_t* msg);
 
-//1.²ÎÊıÉè¶¨
+//1.å‚æ•°è®¾å®š
 void set_cfg(char* variable, uint8_t value, uint8_t id);
 
-//2.²ÎÊı²éÑ¯
+//2.å‚æ•°æŸ¥è¯¢
 void req_cfg(char* variable, uint8_t id);
 
-//3.¿ª»ú
+//3.å¼€æœº
 void start(uint8_t id);
 
-//4.¹Ø»ú
+//4.å…³æœº
 void emergent_stop(uint8_t id);
 
 
 
 
-/*»Øµ÷º¯Êı*/
-//Ö´ĞĞÃüÁîºóÏìÓ¦
+/*å›è°ƒå‡½æ•°*/
+//æ‰§è¡Œå‘½ä»¤åå“åº”
 void response_ok(uint8_t id);
 void response_busy(uint8_t id);
 void response_error(uint8_t id, char* msg);

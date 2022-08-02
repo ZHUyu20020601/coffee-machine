@@ -65,7 +65,7 @@ char* AddBuffer(void){
 
 char* SetCurrentCfg(void){
 	int i = 0;
-	//������ڵȴ�״̬��ֱ�Ӷ�ȡ
+	//如果处于等待状态，直接读取
 	if(Waiting == GetSystemStatus()){
 		if(buf.rear == 0)
 			return "buf empty!";
@@ -77,7 +77,7 @@ char* SetCurrentCfg(void){
 			buf.rear--;
 		}
 	}
-	//������ڹ���״̬��ʲô������
+	//如果处于工作状态则什么都不做
 	return NULL;
 }
 

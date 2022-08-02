@@ -9,56 +9,56 @@ extern DMA_HandleTypeDef hdma_usart1_rx;
 //extern SystemCfg tempCfg;
 
 
-uint8_t rx_buffer[200];   //½ÓÊÕÊı¾İµÄÊı×é
-uint8_t rx_log[50];   //ÈÕÖ¾Êı×é
-volatile uint8_t rx_len = 0; //½ÓÊÕÊı¾İµÄ³¤¶È
-volatile uint8_t recv_end_flag = 0; //½ÓÊÕ½áÊø±êÖ¾Î»
+uint8_t rx_buffer[200];   //æ¥æ”¶æ•°æ®çš„æ•°ç»„
+uint8_t rx_log[50];   //æ—¥å¿—æ•°ç»„
+volatile uint8_t rx_len = 0; //æ¥æ”¶æ•°æ®çš„é•¿åº¦
+volatile uint8_t recv_end_flag = 0; //æ¥æ”¶ç»“æŸæ ‡å¿—ä½
 
 
 
 
-//²»ÒªÔÙÖĞ¶Ïº¯ÊıÖĞÊ¹ÓÃ£¡£¡
+//ä¸è¦å†ä¸­æ–­å‡½æ•°ä¸­ä½¿ç”¨ï¼ï¼
 void uart1_send_string(uint8_t *tdata){
-	//µÈ´ı·¢ËÍ×´Ì¬OK
+	//ç­‰å¾…å‘é€çŠ¶æ€OK
   while(HAL_DMA_GetState(&hdma_usart1_tx) == HAL_DMA_STATE_BUSY) HAL_Delay(1);
-  //·¢ËÍÊı¾İ
+  //å‘é€æ•°æ®
   HAL_UART_Transmit_DMA(&huart1,tdata,strlen((char*)tdata));
 }
 
-//²»ÒªÔÙÖĞ¶Ïº¯ÊıÖĞÊ¹ÓÃ£¡£¡
+//ä¸è¦å†ä¸­æ–­å‡½æ•°ä¸­ä½¿ç”¨ï¼ï¼
 void uart1_send_data(uint8_t *tdata,uint16_t tnum){
-	//µÈ´ı·¢ËÍ×´Ì¬OK
+	//ç­‰å¾…å‘é€çŠ¶æ€OK
   while(HAL_DMA_GetState(&hdma_usart1_tx) == HAL_DMA_STATE_BUSY) HAL_Delay(1);
-  //·¢ËÍÊı¾İ
+  //å‘é€æ•°æ®
   HAL_UART_Transmit_DMA(&huart1,tdata,tnum);
 }
 
-//¿ªÆôuart1 DMAÊÕ·¢
+//å¼€å¯uart1 DMAæ”¶å‘
 void uart1_start_dma(void){
-	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//¿ªÆôDMA
+	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//å¼€å¯DMA
 }
 
 
 
 /*
 FUNCTION:
-½âÎöÊÕµ½µÄ¶ÔÏó£¬×÷ÏàÓ¦µÄ²Ù×÷
+è§£ææ”¶åˆ°çš„å¯¹è±¡ï¼Œä½œç›¸åº”çš„æ“ä½œ
 
 ATTENTION:
-1.ÖĞ¶Ïº¯ÊıÖĞ²»ÄÜĞ´printfºÍmalloc
-2.cJson_Delete±ØĞëĞ´ÔÚ×îºó£¬Èç¹ûĞ´ÔÚÇ°Ãæ»áµ¼ÖÂÌõ¼şÅĞ¶Ï½á¹û³ö´í£¬Ô­Òò²»Ã÷
+1.ä¸­æ–­å‡½æ•°ä¸­ä¸èƒ½å†™printfå’Œmalloc
+2.cJson_Deleteå¿…é¡»å†™åœ¨æœ€åï¼Œå¦‚æœå†™åœ¨å‰é¢ä¼šå¯¼è‡´æ¡ä»¶åˆ¤æ–­ç»“æœå‡ºé”™ï¼ŒåŸå› ä¸æ˜
 */
 
 void parse_msg(uint8_t* msg){
 		
 		
-	cJSON* obj = cJSON_Parse((char*)msg);//½âÎö¶ÔÏó
+	cJSON* obj = cJSON_Parse((char*)msg);//è§£æå¯¹è±¡
 	
-	char* type = cJSON_GetObjectItem(obj, "type")->valuestring;//·ÖÎöÃüÁîÀàĞÍ
-	uint8_t id = cJSON_GetObjectItem(obj, "id")->valueint;//½âÎöÃüÁîºÅÂë
+	char* type = cJSON_GetObjectItem(obj, "type")->valuestring;//åˆ†æå‘½ä»¤ç±»å‹
+	uint8_t id = cJSON_GetObjectItem(obj, "id")->valueint;//è§£æå‘½ä»¤å·ç 
 	
 	
-	//ÅĞ¶ÏÊÇ·ñÎªcommand
+	//åˆ¤æ–­æ˜¯å¦ä¸ºcommand
 	if(strcmp(type, "command") == 0){
 		cJSON* command = cJSON_GetObjectItem(obj, "command");
 		
@@ -70,7 +70,7 @@ void parse_msg(uint8_t* msg){
 		
 	}
 	
-	//ÅĞ¶ÏÊÇ·ñÎªrequest
+	//åˆ¤æ–­æ˜¯å¦ä¸ºrequest
 	if( strcmp(type, "request") == 0){
 		char* variable = cJSON_GetObjectItem(obj, "variable")->valuestring;
 		req_cfg(variable, id);
@@ -78,12 +78,12 @@ void parse_msg(uint8_t* msg){
 		
 	}
 	
-	//ÅĞ¶ÏÊÇ·ñÎªstart
+	//åˆ¤æ–­æ˜¯å¦ä¸ºstart
 	if( strcmp(type, "start") == 0){
 		start(id);
 	}
 	
-	//ÅĞ¶ÏÊÇ·ñÎªemergent stop
+	//åˆ¤æ–­æ˜¯å¦ä¸ºemergent stop
 	if( strcmp(type, "emergent stop") == 0){
 		emergent_stop(id);
 	}
@@ -99,7 +99,7 @@ void set_cfg(char* variable, uint8_t value, uint8_t id){
 	
 	char* msg = NULL;
 	
-		/*¶ÔtempCfg½øĞĞĞŞ¸Ä£¬²¢·ÅÈë¶ÓÁĞÖĞ*/
+		/*å¯¹tempCfgè¿›è¡Œä¿®æ”¹ï¼Œå¹¶æ”¾å…¥é˜Ÿåˆ—ä¸­*/
 	if(strcmp(variable, "coffee") == 0)
 		SetNextCfg(coffee, value);
 	if(strcmp(variable,"milk") == 0)
@@ -132,8 +132,8 @@ void req_cfg(char* variable, uint8_t id){
 	uint8_t value;
 	
 	
-//Ã¿´Î¶¼¶ÁÈ¡µÄÊÇcurrentCfg£¬²»ÄÜ»ñµÃbufÖĞµÄÄÚÈİ
-//Èç¹û´ÓÎ´addbufºÍstart£¬¼´Ã»ÓĞ½øĞĞ¹ısetcurrentcfg£¬ÄÇÃ´currentcfg½«ÊÇ¸Õ¸Õ³õÊ¼»¯µÄ×´Ì¬
+//æ¯æ¬¡éƒ½è¯»å–çš„æ˜¯currentCfgï¼Œä¸èƒ½è·å¾—bufä¸­çš„å†…å®¹
+//å¦‚æœä»æœªaddbufå’Œstartï¼Œå³æ²¡æœ‰è¿›è¡Œè¿‡setcurrentcfgï¼Œé‚£ä¹ˆcurrentcfgå°†æ˜¯åˆšåˆšåˆå§‹åŒ–çš„çŠ¶æ€
 	/*
 	if(strcmp(variable, "coffee") == 0)
 		value = GetCurrentCfg(coffee);
@@ -145,7 +145,7 @@ void req_cfg(char* variable, uint8_t id){
 		value = GetCurrentCfg(temp);
 	*/
 	
-//Ã¿´Î¶¼Ö»¶ÁÈ¡tempCfgÖĞµÄ²ÎÊı£¬¶ÔÓÚÒÑ¾­´æÈë¶ÓÁĞµÄ²ÎÊıÒÔ¼°currentcfgÔòÎŞ·¨¶ÁÈ¡	
+//æ¯æ¬¡éƒ½åªè¯»å–tempCfgä¸­çš„å‚æ•°ï¼Œå¯¹äºå·²ç»å­˜å…¥é˜Ÿåˆ—çš„å‚æ•°ä»¥åŠcurrentcfgåˆ™æ— æ³•è¯»å–	
 	if(strcmp(variable, "coffee") == 0)
 		value = GetTempCfg(coffee);
 	if(strcmp(variable,"milk") == 0)
@@ -168,7 +168,7 @@ void req_cfg(char* variable, uint8_t id){
 void start(uint8_t id){
 	//response_ok(id);
 	
-	//¶ÁÈ¡¶ÓÁĞÖĞµÄ²ÎÊı
+	//è¯»å–é˜Ÿåˆ—ä¸­çš„å‚æ•°
 	char* msg = SetCurrentCfg();
 	
 	if(msg != NULL){
@@ -179,7 +179,7 @@ void start(uint8_t id){
 	
 	SetStatusMaking();
 	/*
-	ÔÚÕâÀï¼ÓÈëÖÆ×÷¿§·È»úµÄ½ø³Ì´úÂë
+	åœ¨è¿™é‡ŒåŠ å…¥åˆ¶ä½œå’–å•¡æœºçš„è¿›ç¨‹ä»£ç 
 	*/
 	SetStatusWaiting();
 	
@@ -191,16 +191,16 @@ void start(uint8_t id){
 void emergent_stop(uint8_t id){
 	SetStatusError();
 	/*
-	ÔÚÕâÀï¼ÓÈë¿§·È»ú½ô¼±Í£»úµÄ´úÂë
+	åœ¨è¿™é‡ŒåŠ å…¥å’–å•¡æœºç´§æ€¥åœæœºçš„ä»£ç 
 	*/
 	response_status(id);
 }
 
 
 
-/*----·µ»Ø----*/
+/*----è¿”å›----*/
 void response_ok(uint8_t id){
-	//Éú³ÉÄ¿±ê¶ÔÏó
+	//ç”Ÿæˆç›®æ ‡å¯¹è±¡
 	cJSON* cjson = cJSON_CreateObject();
 	cJSON_AddStringToObject(cjson, "type", "response");
 	cJSON_AddNumberToObject(cjson, "id", id);
@@ -211,19 +211,19 @@ void response_ok(uint8_t id){
 	
 	cJSON_AddItemToObject(cjson, "result", response);
 	
-	//´«µİ¸ølog×Ö·û´®
+	//ä¼ é€’ç»™logå­—ç¬¦ä¸²
 	strcpy(rx_log, cJSON_Print(cjson));
 	
-	//Ïú»Ù¶ÔÏó
+	//é”€æ¯å¯¹è±¡
 	cJSON_Delete(cjson);
 	
-	//·¢ËÍ
+	//å‘é€
 	HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
 }
 
 
 void response_making(uint8_t id){
-		//Éú³ÉÄ¿±ê¶ÔÏó
+		//ç”Ÿæˆç›®æ ‡å¯¹è±¡
 	cJSON* cjson = cJSON_CreateObject();
 	cJSON_AddStringToObject(cjson, "type", "response");
 	cJSON_AddNumberToObject(cjson, "id", id);
@@ -234,19 +234,19 @@ void response_making(uint8_t id){
 	
 	cJSON_AddItemToObject(cjson, "result", response);
 	
-	//´«µİ¸ølog×Ö·û´®
+	//ä¼ é€’ç»™logå­—ç¬¦ä¸²
 	strcpy(rx_log, cJSON_Print(cjson));
 	
-	//Ïú»Ù¶ÔÏó
+	//é”€æ¯å¯¹è±¡
 	cJSON_Delete(cjson);
 	
-	//·¢ËÍ
+	//å‘é€
 	HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
 }
 
 
 void response_error(uint8_t id, char* msg){
-	//Éú³ÉÄ¿±ê¶ÔÏó
+	//ç”Ÿæˆç›®æ ‡å¯¹è±¡
 	cJSON* cjson = cJSON_CreateObject();
 	cJSON_AddStringToObject(cjson, "type", "response");
 	cJSON_AddNumberToObject(cjson, "id", id);
@@ -257,18 +257,18 @@ void response_error(uint8_t id, char* msg){
 	
 	cJSON_AddItemToObject(cjson, "result", response);
 	
-	//´«µİ¸ølog×Ö·û´®
+	//ä¼ é€’ç»™logå­—ç¬¦ä¸²
 	strcpy(rx_log, cJSON_Print(cjson));
 	
-	//Ïú»Ù¶ÔÏó
+	//é”€æ¯å¯¹è±¡
 	cJSON_Delete(cjson);
 	
-	//·¢ËÍ
+	//å‘é€
 	HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
 }
 
 void response_request(uint8_t id, char* variable, uint8_t value){
-	//Éú³ÉÄ¿±ê¶ÔÏó
+	//ç”Ÿæˆç›®æ ‡å¯¹è±¡
 	cJSON* cjson = cJSON_CreateObject();
 	cJSON_AddStringToObject(cjson, "type", "variable");
 	cJSON_AddNumberToObject(cjson, "id", id);
@@ -279,19 +279,19 @@ void response_request(uint8_t id, char* variable, uint8_t value){
 	
 	cJSON_AddItemToObject(cjson, "result", response);
 	
-	//´«µİ¸ølog×Ö·û´®
+	//ä¼ é€’ç»™logå­—ç¬¦ä¸²
 	strcpy(rx_log, cJSON_Print(cjson));
 	
-	//Ïú»Ù¶ÔÏó
+	//é”€æ¯å¯¹è±¡
 	cJSON_Delete(cjson);
 	
-	//·¢ËÍ
+	//å‘é€
 	HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
 	
 }
 
 void response_status(uint8_t id){
-	//Éú³ÉÄ¿±ê¶ÔÏó
+	//ç”Ÿæˆç›®æ ‡å¯¹è±¡
 	cJSON* cjson = cJSON_CreateObject();
 	cJSON_AddStringToObject(cjson, "type", "status");
 	cJSON_AddNumberToObject(cjson, "id", id);
@@ -304,13 +304,13 @@ void response_status(uint8_t id){
 		cJSON_AddStringToObject(cjson, "status", "error");
 
 	
-	//´«µİ¸ølog×Ö·û´®
+	//ä¼ é€’ç»™logå­—ç¬¦ä¸²
 	strcpy(rx_log, cJSON_Print(cjson));
 	
-	//Ïú»Ù¶ÔÏó
+	//é”€æ¯å¯¹è±¡
 	cJSON_Delete(cjson);
 	
-	//·¢ËÍ
+	//å‘é€
 	HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
 }
 

@@ -67,9 +67,9 @@ extern TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN EV */
 
-extern uint8_t rx_buffer[200];   //½ÓÊÕÊı¾İµÄÊı×é
-extern volatile uint8_t rx_len; //½ÓÊÕÊı¾İµÄ³¤¶È
-extern volatile uint8_t recv_end_flag; //½ÓÊÕ½áÊø±êÖ¾Î»
+extern uint8_t rx_buffer[200];   //æ¥æ”¶æ•°æ®çš„æ•°ç»„
+extern volatile uint8_t rx_len; //æ¥æ”¶æ•°æ®çš„é•¿åº¦
+extern volatile uint8_t recv_end_flag; //æ¥æ”¶ç»“æŸæ ‡å¿—ä½
 //extern uint8_t rx_log[30];
 /* USER CODE END EV */
 
@@ -251,28 +251,28 @@ void USART1_IRQHandler(void)
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
-	uint8_t tmp_flag =__HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE); //»ñÈ¡IDLE×´Ì¬
-	if((tmp_flag != RESET))//ÅĞ¶Ï½ÓÊÕÊÇ·ñ½áÊø
+	uint8_t tmp_flag =__HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE); //è·å–IDLEçŠ¶æ€
+	if((tmp_flag != RESET))//åˆ¤æ–­æ¥æ”¶æ˜¯å¦ç»“æŸ
 		{ 
-      // recv_end_flag = 1; //½ÓÊÕ½áÊø
-      __HAL_UART_CLEAR_IDLEFLAG(&huart1);//Çå³ı±êÖ¾Î»
+      // recv_end_flag = 1; //æ¥æ”¶ç»“æŸ
+      __HAL_UART_CLEAR_IDLEFLAG(&huart1);//æ¸…é™¤æ ‡å¿—ä½
 			
       HAL_UART_DMAStop(&huart1); 
 			
       uint8_t temp=__HAL_DMA_GET_COUNTER(&hdma_usart1_rx);    
 			
-      rx_len =200-temp; //¼ÆËãÊı¾İ³¤¶È
+      rx_len =200-temp; //è®¡ç®—æ•°æ®é•¿åº¦
 			
-      //HAL_UART_Transmit_DMA(&huart1, rx_buffer,rx_len);//·¢ËÍÊı¾İ
+      //HAL_UART_Transmit_DMA(&huart1, rx_buffer,rx_len);//å‘é€æ•°æ®
 			
 			//HAL_UART_Transmit_DMA(&huart1, "recieved msg\n", 14);
 			
-			parse_msg(rx_buffer);//´¦Àí½ÓÊÜµ½µÄÊı¾İ
+			parse_msg(rx_buffer);//å¤„ç†æ¥å—åˆ°çš„æ•°æ®
 			
 			//HAL_UART_Transmit_DMA(&huart1, rx_log, 14);
 			
 			uart1_start_dma();
-     //HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//¿ªÆôDMA
+     //HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//å¼€å¯DMA
 		}
 
   /* USER CODE END USART1_IRQn 1 */
