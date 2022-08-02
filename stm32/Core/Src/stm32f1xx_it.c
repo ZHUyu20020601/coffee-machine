@@ -63,11 +63,14 @@ extern TIM_HandleTypeDef htim4;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern UART_HandleTypeDef huart1;
+extern TIM_HandleTypeDef htim1;
+
 /* USER CODE BEGIN EV */
 
 extern uint8_t rx_buffer[200];   //接收数据的数组
 extern volatile uint8_t rx_len; //接收数据的长度
 extern volatile uint8_t recv_end_flag; //接收结束标志位
+//extern uint8_t rx_log[30];
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -149,19 +152,6 @@ void UsageFault_Handler(void)
 }
 
 /**
-  * @brief This function handles System service call via SWI instruction.
-  */
-void SVC_Handler(void)
-{
-  /* USER CODE BEGIN SVCall_IRQn 0 */
-
-  /* USER CODE END SVCall_IRQn 0 */
-  /* USER CODE BEGIN SVCall_IRQn 1 */
-
-  /* USER CODE END SVCall_IRQn 1 */
-}
-
-/**
   * @brief This function handles Debug monitor.
   */
 void DebugMon_Handler(void)
@@ -172,33 +162,6 @@ void DebugMon_Handler(void)
   /* USER CODE BEGIN DebugMonitor_IRQn 1 */
 
   /* USER CODE END DebugMonitor_IRQn 1 */
-}
-
-/**
-  * @brief This function handles Pendable request for system service.
-  */
-void PendSV_Handler(void)
-{
-  /* USER CODE BEGIN PendSV_IRQn 0 */
-
-  /* USER CODE END PendSV_IRQn 0 */
-  /* USER CODE BEGIN PendSV_IRQn 1 */
-
-  /* USER CODE END PendSV_IRQn 1 */
-}
-
-/**
-  * @brief This function handles System tick timer.
-  */
-void SysTick_Handler(void)
-{
-  /* USER CODE BEGIN SysTick_IRQn 0 */
-
-  /* USER CODE END SysTick_IRQn 0 */
-  HAL_IncTick();
-  /* USER CODE BEGIN SysTick_IRQn 1 */
-
-  /* USER CODE END SysTick_IRQn 1 */
 }
 
 /******************************************************************************/
@@ -234,6 +197,20 @@ void DMA1_Channel5_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel5_IRQn 1 */
 
   /* USER CODE END DMA1_Channel5_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM1 update interrupt.
+  */
+void TIM1_UP_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_UP_IRQn 0 */
+
+  /* USER CODE END TIM1_UP_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim1);
+  /* USER CODE BEGIN TIM1_UP_IRQn 1 */
+
+  /* USER CODE END TIM1_UP_IRQn 1 */
 }
 
 /**
@@ -286,8 +263,13 @@ void USART1_IRQHandler(void)
 			
       rx_len =200-temp; //计算数据长度
 			
-      HAL_UART_Transmit_DMA(&huart1, rx_buffer,rx_len);//发送数据
-			parse_msg(rx_buffer);
+      //HAL_UART_Transmit_DMA(&huart1, rx_buffer,rx_len);//发送数据
+			
+			//HAL_UART_Transmit_DMA(&huart1, "recieved msg\n", 14);
+			
+			parse_msg(rx_buffer);//处理接受到的数据
+			
+			//HAL_UART_Transmit_DMA(&huart1, rx_log, 14);
 			
 			uart1_start_dma();
      //HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//开启DMA

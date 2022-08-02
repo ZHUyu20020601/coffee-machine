@@ -68,10 +68,11 @@ void SetStatusWaiting(void);
 void SetNextCfg(cfg_property, uint8_t);
 
 //等待tempCfg设置完毕后存入buffer
-void AddBuffer(void);
+char* AddBuffer(void);
+int buf_empty(void);
 
 //读取buf预设，设定下一杯咖啡的参数
-void SetCurrentCfg(void);
+char* SetCurrentCfg(void);
 uint8_t GetCurrentCfg(cfg_property);
 
 /*工具函数*/
