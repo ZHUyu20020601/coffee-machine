@@ -94,6 +94,32 @@ uint8_t GetCurrentCfg(cfg_property property){
 	return 0;
 }
 
+uint8_t GetNextCfg(cfg_property property){
+	if(property == coffee)
+		return buf.buffer[0].coffee;
+	if(property == milk)
+		return buf.buffer[0].milk;
+	if(property == sugar)
+		return buf.buffer[0].sugar;
+	if(property == temp)
+		return buf.buffer[0].temp;
+	return 0;
+	
+}
+
+uint8_t GetTempCfg(cfg_property property){
+		if(property == coffee)
+		return tempCfg.coffee;
+	if(property == milk)
+		return tempCfg.milk;
+	if(property == sugar)
+		return tempCfg.sugar;
+	if(property == temp)
+		return tempCfg.temp;
+	return 0;
+}
+
+
 int buf_empty(void){
 	if(buf.rear == 0)
 		return 1;

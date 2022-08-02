@@ -127,10 +127,14 @@ void set_cfg(char* variable, uint8_t value, uint8_t id){
 	
 }
 
-//只在start过后才有效，读取的是currentCfg，不能获得buf中的内容
+
 void req_cfg(char* variable, uint8_t id){
 	uint8_t value;
 	
+	
+//每次都读取的是currentCfg，不能获得buf中的内容
+//如果从未addbuf和start，即没有进行过setcurrentcfg，那么currentcfg将是刚刚初始化的状态
+	/*
 	if(strcmp(variable, "coffee") == 0)
 		value = GetCurrentCfg(coffee);
 	if(strcmp(variable,"milk") == 0)
@@ -139,6 +143,19 @@ void req_cfg(char* variable, uint8_t id){
 		value = GetCurrentCfg(sugar);
 	if(strcmp(variable,"temp") == 0)
 		value = GetCurrentCfg(temp);
+	*/
+	
+//每次都只读取tempCfg中的参数，对于已经存入队列的参数以及currentcfg则无法读取	
+	if(strcmp(variable, "coffee") == 0)
+		value = GetTempCfg(coffee);
+	if(strcmp(variable,"milk") == 0)
+		value = GetTempCfg(milk);
+	if(strcmp(variable,"sugar") == 0)
+		value = GetTempCfg(sugar);
+	if(strcmp(variable,"temp") == 0)
+		value = GetTempCfg(temp);
+	
+	
 	
 	//sprintf(rx_log, "value of %s is %d\n", variable, value);
 	//HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));

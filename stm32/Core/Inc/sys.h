@@ -19,7 +19,13 @@ SetNextCfg(coffee,40); //设定加料
 SetNextCfg(milk,20);
 SetNextCfg(sugar,10);
 SetNextCfg(temp,30);
-AddBuffer(); //加入缓存
+//AddBuffer(); //加入缓存
+//谨慎起见最好使用 
+char* msg = AddBuffer();
+if(msg != NULL)
+	response_error(id, msg);
+else
+	response_ok(id);
 SetCurrentCfg(); //读取缓存设定
 SetStatusMaking(); //进入工作状态
 
@@ -74,6 +80,8 @@ int buf_empty(void);
 //读取buf预设，设定下一杯咖啡的参数
 char* SetCurrentCfg(void);
 uint8_t GetCurrentCfg(cfg_property);
+uint8_t GetNextCfg(cfg_property);
+uint8_t GetTempCfg(cfg_property);
 
 /*工具函数*/
 //void HAL_Delay_us(uint32_t us);
