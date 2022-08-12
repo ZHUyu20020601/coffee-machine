@@ -2,9 +2,12 @@
 #include "string.h"
 #include "stdio.h"
 #include "sys.h"
+#include "freertos.h"
+#include "cmsis_os.h"
 
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
+extern osThreadId_t makingTaskHandle;
 
 //extern SystemCfg tempCfg;
 
@@ -177,11 +180,12 @@ void start(uint8_t id){
 	}
 	
 	
-	SetStatusMaking();
-	/*
-	在这里加入制作咖啡机的进程代码
-	*/
-	SetStatusWaiting();
+	if(GetSystemStatus() == Waiting)
+		SetStatusMaking();
+	if(GetSystemStatus() == Error){
+		osThreadResume(makingTaskHandle);
+		SetStatusMaking();
+	}
 	
 	response_status(id);
 	
@@ -189,12 +193,14 @@ void start(uint8_t id){
 }
 
 void emergent_stop(uint8_t id){
-	SetStatusError();
-	/*
-	在这里加入咖啡机紧急停机的代码
-	*/
+	
+	if(GetSystemStatus() != Error)
+		SetStatusError();
+	
 	response_status(id);
 }
+
+
 
 
 

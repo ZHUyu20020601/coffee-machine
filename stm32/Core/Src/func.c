@@ -95,3 +95,10 @@ void heat_time(uint8_t s){
 	heat_off();
 }
 
+void pour_out(void){
+	HAL_GPIO_WritePin(pour_relay_GPIO_Port,pour_relay_Pin, GPIO_PIN_RESET);
+	HAL_Delay(10000);
+	HAL_GPIO_WritePin(pour_relay_GPIO_Port,pour_relay_Pin, GPIO_PIN_SET);
+	
+}
+

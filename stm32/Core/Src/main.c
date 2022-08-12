@@ -109,7 +109,9 @@ int main(void)
 	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);  //开启DMA接收中断
 
 	//ensure all relays are shut
-	//shut_all_relay();
+	shut_all_relay();
+	//自定义系统初始化
+	InitSystem();
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -123,41 +125,9 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	
-	//float dist = 0;;
-	//dist = get_coffee_dist();
-	//uint32_t n = 0;
-	//HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
-	//HAL_Delay(100);
-	
-	
-	//my_uart1_enable_interrupt();
-	
-	
-	InitSystem();
-	
+	//在这里什么都不要写
   while (1)
   {
-		
-	
-		//my_uart1_send_string("test123\r\n");
-		//HAL_Delay(10);
-		
-		//my_uart1_enable_interrupt();
-		//HAL_UART_RxCpltCallback(&huart1);
-		
-		/*
-		dist = get_sugar_dist();
-		printf("distance is %.2f cm.\r\n",dist);
-		HAL_Delay(1000);
-		*/
-		
-		//cJSON测试
-		//my_uart1_send_string((uint8_t*)json_str);
-		//my_uart1_send_data((uint8_t*)json_str, strlen(json_str));
-		//printf(json_str);
-		//cJSON_Print(cjson);
-		//HAL_Delay(100);
-		
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
