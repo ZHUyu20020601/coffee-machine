@@ -17,13 +17,13 @@
   */
 	
 /* 
-* 在这里写一些提醒！
+* 在这里写�?些提醒！
   1. osDelay(pdMS_TO_TICKS(ms));可以延时毫秒?
-	2. 注意osDelay是 阻塞 的 ，而 HAL_DELAY()是 非阻塞的。也就是说
+	2. 注意osDelay�? 阻塞 �? ，�?? HAL_DELAY()�? 非阻塞的。也就是�?
 		 在使用osDelay时，其他的task任然可以执行
-	3. making进程和error进程都采用查询系统状态getsysemstatus()获取状态，
-		 在connect.c中的start和emergent_stop调用setsystemstatus()修改状态，
-		 making/error检测到系统状态改变，则会运行相应代码
+	3. making进程和error进程都采用查询系统状态getsysemstatus()获取状�?�，
+		 在connect.c中的start和emergent_stop调用setsystemstatus()修改状�?�，
+		 making/error�?测到系统状�?�改变，则会运行相应代码
 		 
 */
 	
@@ -34,11 +34,13 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
-#include "sys.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "main.h"
+#include "sys.h"
 #include "stdio.h"
+#include "sensor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,6 +58,8 @@
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
+extern onewire tempSensor;
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -65,7 +69,7 @@ osThreadId_t makingTaskHandle;
 
 const osThreadAttr_t makingTask_attributes = {
 	.name = "makingTask",
-	.stack_size = 128 * 8,
+	.stack_size = 128 * 10,
 	.priority = (osPriority_t) osPriorityAboveNormal,
 };
 
@@ -74,8 +78,8 @@ osThreadId_t errorTaskHandle;
 
 const osThreadAttr_t errorTask_attributes = {
 	.name = "errorTask",
-	.stack_size = 128 * 4,
-	.priority = (osPriority_t) osPriorityHigh,//设置优先级最高
+	.stack_size = 128 * 6,
+	.priority = (osPriority_t) osPriorityHigh,//设置优先级最�?
 
 };
 
@@ -175,58 +179,67 @@ void startMakingTask(void *argument){
 	uint8_t cnt = 0;
 
 	for(;;){
-		/*在下方加入制作咖啡机的进程代码*/
+		/*在下方加入制作咖啡机的进程代�?*/
 		
 		/*
 		TODO:
-		将下面的代码（if中的内容）替换为实际的业务逻辑代码
-		1. 加咖啡
+		将下面的代码（if中的内容）替换为实际的业务�?�辑代码
+		1. 加咖�?
 			1.1. 容量
-		2. 加牛奶
+		2. 加牛�?
 		3. 加糖
 		4. 加热
 		5. 搅拌
 		6. 倒出
 		
 		ATTENTION:
-		1. Error进程会将此进程挂起
+		1. Error进程会将此进程挂�?
 		2. 此进程挂起后恢复，会直接回到上一次被挂起的点继续执行
 		
 		*/
 		
 		
 		if( GetSystemStatus() == Making){
+			
 			printf("making %d%%\n", cnt*5);
-			osDelay(pdMS_TO_TICKS(2000));
+			
+			printf("temp = %.2f\n", ds18b20_readtemperature(&tempSensor) / 100.0);
+			printf("coffee dist = %.2f\n", get_milk_dist());
+			
+			//osDelay(pdMS_TO_TICKS(2000));
 			//HAL_Delay(200);
 			cnt++;
 			if(cnt > 20){
-				SetStatusWaiting();//重新将状态切回等待
+				SetStatusWaiting();//重新将状态切回等�?
 				cnt = 0;
 			}
 		}
 		
 		
-		/*在上方加入制作咖啡机的进程代码*/
-		else
+		/*在上方加入制作咖啡机的进程代�?*/
+		else{
 			osDelay(200);
+			//printf("222");
+		}
 	}
 	
 }
 
 /**
-* @brief  紧急停机
+* @brief  紧�?�停�?
 * @param  argument: Not used
 * @retval None
   */
 void startErrorTask(void *argument){
 	for(;;){
-		/*在下方加入咖啡机紧急停机的代码*/
+		
+		/*在下方加入咖啡机紧�?�停机的代码*/
 		if(GetSystemStatus() == Error){
 			
 			printf("emergent stop!\n");
+
 			
-			//将咖啡制作进程挂起
+			//将咖啡制作进程挂�?
 			if(osThreadGetState(makingTaskHandle) != osThreadBlocked)
 				osThreadSuspend(makingTaskHandle);
 			
@@ -236,7 +249,11 @@ void startErrorTask(void *argument){
 		}
 		/*在上方加入紧急停机的进程代码*/
 		else{
-			osDelay(10);
+			//printf("111\n");
+			osDelay(pdMS_TO_TICKS(500));
+			if( osThreadGetState(makingTaskHandle) == osThreadBlocked && GetSystemStatus() == Making){
+				osThreadResume(makingTaskHandle);
+			}
 		}
 	}
 }

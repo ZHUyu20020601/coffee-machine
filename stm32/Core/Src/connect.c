@@ -2,8 +2,9 @@
 #include "string.h"
 #include "stdio.h"
 #include "sys.h"
-#include "freertos.h"
+#include "FreeRtos.h"
 #include "cmsis_os.h"
+#include "task.h"
 
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
@@ -171,21 +172,24 @@ void req_cfg(char* variable, uint8_t id){
 void start(uint8_t id){
 	//response_ok(id);
 	
+	//为防止连续两次执行start，放在if中
+	if(GetSystemStatus() != Making){
 	//读取队列中的参数
-	char* msg = SetCurrentCfg();
+		char* msg = SetCurrentCfg();
 	
-	if(msg != NULL){
-		response_error(id, msg);
-		return;
+		if(msg != NULL){
+			response_error(id, msg);
+			return;
+		}
 	}
 	
 	
 	if(GetSystemStatus() == Waiting)
 		SetStatusMaking();
 	if(GetSystemStatus() == Error){
-		osThreadResume(makingTaskHandle);
 		SetStatusMaking();
 	}
+
 	
 	response_status(id);
 	
@@ -194,8 +198,9 @@ void start(uint8_t id){
 
 void emergent_stop(uint8_t id){
 	
-	if(GetSystemStatus() != Error)
+	if(GetSystemStatus() != Error){
 		SetStatusError();
+	}
 	
 	response_status(id);
 }

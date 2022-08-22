@@ -54,6 +54,7 @@
 
 /* USER CODE BEGIN PV */
 int DEBUG = 1;
+onewire tempSensor = {GPIOC,GPIO_PIN_12};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -65,7 +66,7 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-extern uint8_t rx_buffer[200];   //接收数据的数组
+extern uint8_t rx_buffer[200];   //接收数据的数�?
 
 /* USER CODE END 0 */
 
@@ -98,20 +99,22 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USART3_UART_Init();
   MX_USART2_UART_Init();
   MX_USART1_UART_Init();
+  MX_TIM6_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 	
-	__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //开启空闲中断
-	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);  //开启DMA接收中断
+	__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //�?启空闲中�?
+	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);  //�?启DMA接收中断
 
 	//ensure all relays are shut
 	shut_all_relay();
 	//自定义系统初始化
 	InitSystem();
+	
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -125,7 +128,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	
-	//在这里什么都不要写
+	//在这里什么都不要�?
   while (1)
   {
     /* USER CODE END WHILE */

@@ -448,6 +448,16 @@
               <FilePath>..\Core\Src\cJSON.c</FilePath>
             </File>
             <File>
+              <FileName>tempSensor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\tempSensor.h</FilePath>
+            </File>
+            <File>
+              <FileName>tempSensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\tempSensor.c</FilePath>
+            </File>
+            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/main.c</FilePath>
