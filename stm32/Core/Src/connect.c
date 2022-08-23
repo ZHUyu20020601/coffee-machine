@@ -116,19 +116,11 @@ void set_cfg(char* variable, uint8_t value, uint8_t id){
 			msg = AddBuffer();
 		
 		
-	//AddBuffer();
-	
-	
-	//SetCurrentCfg();
-	//sprintf(rx_log, "already set!\ncoffee, milk, sugar, temp = %d, %d, %d, %d\r\n", GetCurrentCfg(coffee),GetCurrentCfg(milk), GetCurrentCfg(sugar), GetCurrentCfg(temp));
-	
 	if(msg == NULL)
 		response_ok(id);
 	else
 		response_error(id, msg);
-	
-	//HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
-	
+
 }
 
 
@@ -184,11 +176,8 @@ void start(uint8_t id){
 	}
 	
 	
-	if(GetSystemStatus() == Waiting)
+	if(GetSystemStatus() != Making)
 		SetStatusMaking();
-	if(GetSystemStatus() == Error){
-		SetStatusMaking();
-	}
 
 	
 	response_status(id);
