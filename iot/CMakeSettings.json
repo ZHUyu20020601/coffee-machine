@@ -20,7 +20,7 @@
           "OPENOCD_SCRIPTS": "${env.IDF_TOOLS_PATH}\\tools\\openocd-esp32\\v0.10.0-esp32-20211111\\openocd-esp32\\share\\openocd\\scripts",
           "PATH": "${env.IDF_TOOLS_PATH}\\tools\\xtensa-esp32-elf\\esp-2021r2-8.4.0\\xtensa-esp32-elf\\bin;${env.IDF_TOOLS_PATH}\\tools\\xtensa-esp32s2-elf\\esp-2021r2-8.4.0\\xtensa-esp32s2-elf\\bin;${env.IDF_TOOLS_PATH}\\tools\\esp32ulp-elf\\2.28.51-esp-20191205\\esp32ulp-elf-binutils\\bin;${env.IDF_TOOLS_PATH}\\tools\\esp32s2ulp-elf\\2.28.51-esp-20191205\\esp32s2ulp-elf-binutils\\bin;${env.IDF_TOOLS_PATH}\\tools\\ninja\\1.10.2\\;${env.IDF_TOOLS_PATH}\\tools\\idf-exe\\1.0.1\\;${env.IDF_TOOLS_PATH}\\tools\\ccache\\3.7\\;${env.IDF_TOOLS_PATH}\\python_env\\idf4.3_py3.8_env\\Scripts;${env.IDF_PATH}\\tools;${env.IDF_PATH};${env.PATH}",
           "INCLUDE": "${env.IDF_TOOLS_PATH}\\tools\\xtensa-esp32-elf\\esp-2021r2-8.4.0\\xtensa-esp32-elf\\xtensa-esp32-elf\\include;${env.IDF_TOOLS_PATH}\\tools\\xtensa-esp32s2-elf\\esp-2021r2-8.4.0\\xtensa-esp32s2-elf\\xtensa-esp32s2-elf\\include;${env.IDF_PATH}\\components;${env.INCLUDE}",
-          "FLASH_COM_PORT": "COM5",
+          "FLASH_COM_PORT": "COM6",
           "environment": "linux_x64"
         }
       ],
