@@ -1,8 +1,12 @@
 
 #include "sensor.h"
+#include "cmsis_os.h"
+
 
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
+
+extern TIM_HandleTypeDef htim6;
 
 const static int average_span = 5;
 
@@ -14,6 +18,7 @@ float get_coffee_dist(void){
 		coffee_trig_send();
 		dist += distance(coffee_time_cap());
 		HAL_Delay(20);//wait 20ms
+		//osDelay(20);
 	}
 	return dist / 5;
 }
@@ -70,26 +75,33 @@ void sugar_trig_send(void){
 
 //get time span must within 65536us
 uint32_t coffee_time_cap(void){
+	
 	uint32_t tim;
+	
 	//wait for callback
 	while(HAL_GPIO_ReadPin(coffee_echo_GPIO_Port, coffee_echo_Pin) == GPIO_PIN_RESET);
-	__HAL_TIM_SetCounter(&htim3,0);
-	HAL_TIM_Base_Start(&htim3);
+	__HAL_TIM_SetCounter(&htim6,0);
+
+	HAL_TIM_Base_Start(&htim6);
+
 	while(HAL_GPIO_ReadPin(coffee_echo_GPIO_Port, coffee_echo_Pin) == GPIO_PIN_SET);
-	HAL_TIM_Base_Stop(&htim3);
-	tim = __HAL_TIM_GetCounter(&htim3);
+	HAL_TIM_Base_Stop(&htim6);
+	
+	tim = __HAL_TIM_GetCounter(&htim6);
 	return tim;
+	
+	
 }
 
 uint32_t milk_time_cap(void){
 	uint32_t tim;
 	//wait for callback
 	while(HAL_GPIO_ReadPin(milk_echo_GPIO_Port, milk_echo_Pin) == GPIO_PIN_RESET);
-	__HAL_TIM_SetCounter(&htim3,0);
-	HAL_TIM_Base_Start(&htim3);
+	__HAL_TIM_SetCounter(&htim6,0);
+	HAL_TIM_Base_Start(&htim6);
 	while(HAL_GPIO_ReadPin(milk_echo_GPIO_Port, milk_echo_Pin) == GPIO_PIN_SET);
-	HAL_TIM_Base_Stop(&htim3);
-	tim = __HAL_TIM_GetCounter(&htim3);
+	HAL_TIM_Base_Stop(&htim6);
+	tim = __HAL_TIM_GetCounter(&htim6);
 	return tim;
 }
 
@@ -97,11 +109,11 @@ uint32_t sugar_time_cap(void){
 	uint32_t tim;
 	//wait for callback
 	while(HAL_GPIO_ReadPin(sugar_echo_GPIO_Port, sugar_echo_Pin) == GPIO_PIN_RESET);
-	__HAL_TIM_SetCounter(&htim3,0);
-	HAL_TIM_Base_Start(&htim3);
+	__HAL_TIM_SetCounter(&htim6,0);
+	HAL_TIM_Base_Start(&htim6);
 	while(HAL_GPIO_ReadPin(sugar_echo_GPIO_Port, sugar_echo_Pin) == GPIO_PIN_SET);
-	HAL_TIM_Base_Stop(&htim3);
-	tim = __HAL_TIM_GetCounter(&htim3);
+	HAL_TIM_Base_Stop(&htim6);
+	tim = __HAL_TIM_GetCounter(&htim6);
 	return tim;
 }
 
@@ -111,4 +123,25 @@ float distance(uint32_t us){
 	dist = us * 0.017;
 	return dist;
 }
+
+
+
+int ds18b20_readtemperature(onewire *ptr){
+	unsigned char lo, hi;
+	int x = 0;
+	onewire_reset(ptr);
+	onewire_writebyte(ptr, 0xcc);//read serial
+	onewire_writebyte(ptr, 0x44);//enable temperature
+	HAL_Delay(800);
+	onewire_reset(ptr);
+	onewire_writebyte(ptr, 0xcc);
+	onewire_writebyte(ptr, 0xbe);
+	lo = onewire_readbyte(ptr);
+	hi = onewire_readbyte(ptr);
+	x = lo | (hi << 8);
+	x = (int)(x * 0.0625 * 100 + 0.5);
+	return x;
+}
+
+
 

@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
+#include "dma.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -25,8 +27,13 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
+#include "string.h"
+#include "stdlib.h"
 #include "sensor.h"
 #include "func.h"
+#include "sys.h"
+#include "connect.h"
+#include "cJSON.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,18 +53,25 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+//'=1'全局debug模式开启
+//在debug时使用uart1通信，否则使用uart3
 int DEBUG = 1;
+
+//温度传感器模块结构体
+onewire tempSensor = {GPIOC,GPIO_PIN_12};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+extern uint8_t rx_buffer[200];   //接收数据的数�?
+extern uint8_t rx_buffer_3[200];
 /* USER CODE END 0 */
 
 /**
@@ -88,38 +102,47 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_TIM3_Init();
+  MX_DMA_Init();
   MX_TIM4_Init();
   MX_USART3_UART_Init();
   MX_USART2_UART_Init();
   MX_USART1_UART_Init();
+  MX_TIM6_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-	//ensure all relays are shut
-	//shut_all_relay();
+	
+	__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //�?启空闲中�?
+	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);  //�?启DMA接收中断
+	
+	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);  //�?启空闲中�?
+	HAL_UART_Receive_DMA(&huart3,rx_buffer,200);  //�?启DMA接收中断
+	
+	/*
+	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);  //�?启空闲中�?
+	HAL_UART_Receive_DMA(&huart3,rx_buffer,200);  //�?启DMA接收中断
+	*/
+	
+	//关闭所有继电器
+	shut_all_relay();
+	//自定义系统初始化
+	InitSystem();
+	
   /* USER CODE END 2 */
 
+  /* Init scheduler */
+  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
+  MX_FREERTOS_Init();
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	
-	float dist = 0;;
-	dist = get_coffee_dist();
-	//uint32_t n = 0;
-	HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
-	HAL_Delay(100);
-	
+	//在这里什么都不做
   while (1)
   {
-		/*����led����
-		HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
-		HAL_Delay(100);
-		HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
-		HAL_Delay(100);
-		*/
-		
-		dist = get_sugar_dist();
-		printf("distance is %.2f cm.\r\n",dist);
-		HAL_Delay(1000);
-		
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -169,6 +192,8 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 
+
+
 //delay Usecond
 void HAL_Delay_us(uint32_t us)
 {
@@ -180,6 +205,27 @@ void HAL_Delay_us(uint32_t us)
 
 
 /* USER CODE END 4 */
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM1 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM1) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.

@@ -1,0 +1,18 @@
+{
+    "type": "command",
+    "id": 0,
+    "command": {
+        "variable": "addbuf",
+        "value": 0
+    }
+}
+
+{
+    "type": "start",
+    "id": 0
+}
+
+{
+    "type": "emergent stop",
+    "id": 0
+}
