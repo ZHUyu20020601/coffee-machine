@@ -5,19 +5,19 @@
 #include "mqtt_client.h"
 #include "cJSON.h"
 
-//»ªÎªÔÆÉÏÔÆÌõ¼þ
+//ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 #define server_ip "mqtt://39.106.12.138"
 #define device_id "CoffeeMachine"
 #define user_name "neworld2020"
 #define pwd "774225688"
 #define mqtt_port 1883
-// ¼ÓÃÜËã·¨ÅäÖÃ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ã·¨ï¿½ï¿½ï¿½ï¿½
 
-//ÊôÐÔÉÏ±¨Topic---·¢²¼
+//ï¿½ï¿½ï¿½ï¿½ï¿½Ï±ï¿½Topic---ï¿½ï¿½ï¿½ï¿½
 #define PROPERTY_REPORT_TOPIC device_id "/property/report"
-//ÃüÁî½ÓÊÕTopic---¶©ÔÄ
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Topic---ï¿½ï¿½ï¿½ï¿½
 #define COMMAND_RECV_TOPIC device_id "/command/exe"
-//ÊôÐÔÉèÖÃ½ÓÊÕTopic---¶©ÔÄ
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½Topic---ï¿½ï¿½ï¿½ï¿½
 #define PROPERTY_SET_RECV_TOPIC device_id "/property/set"
 
 #define MQTT_TAG "MQTT"
@@ -26,7 +26,7 @@ esp_mqtt_client_handle_t client;
 char topic[100];
 char msg[200];
 
-// ×Ö·û²éÕÒº¯Êý
+// ï¿½Ö·ï¿½ï¿½ï¿½ï¿½Òºï¿½ï¿½ï¿½
 const char* find_char(const char* str, char c)
 {
     for (int i = 0; i < strlen(str); i++) {
@@ -37,7 +37,7 @@ const char* find_char(const char* str, char c)
     return NULL;
 }
 
-// ½«mqttÃüÁî×ª»»³ÉÓëSTM32¹µÍ¨µÄÃüÁî
+// ï¿½ï¿½mqttï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½STM32ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 char* command_adapter(const char* origin)
 {
     /*add_coffee -> coffee, add_sugar -> sugar, add_milk -> milk, target_temp -> temp
@@ -55,13 +55,13 @@ char* command_adapter(const char* origin)
         return "temp";
     }
     else {
-        // ²»Ó¦¸Ã³öÏÖµÄÇé¿ö
+        // ï¿½ï¿½Ó¦ï¿½Ã³ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½
         ESP_LOGE(MQTT_TAG, "A Unexpected Command is Recved: %s", origin);
         esp_restart();
     }
 }
 
-// Òì³£´¦Àíº¯Êý
+// ï¿½ì³£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 static void log_error_if_nonzero(const char* message, int error_code)
 {
     if (error_code != 0) {
@@ -69,14 +69,14 @@ static void log_error_if_nonzero(const char* message, int error_code)
     }
 }
 
-// ·ÖÅäÊÂÎñID
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ID
 int alloc_task_id()
 {
     static int id = 0;
     return id++;
 }
 
-// ·¢ËÍÖÁstm32 -- ÔÝÊ±Ê¹ÓÃ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½stm32 -- ï¿½ï¿½Ê±Ê¹ï¿½ï¿½
 void send_to_stm32(const char* msg)
 {
     ESP_LOGI(MQTT_TAG, "send to stm32: %s", msg);
@@ -89,7 +89,7 @@ void mqtt_message_handler()
     ESP_LOGI("HANDLER", "topic=%s", topic);
     ESP_LOGI("HANDLER", "msg=%s", msg);
     if (strcmp(find_char(topic, '/'), "property/set") == 0) {
-        // ÊôÐÔÉèÖÃ£¬Æäbody¸ñÊ½ÈçÏÂ£º
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½bodyï¿½ï¿½Ê½ï¿½ï¿½ï¿½Â£ï¿½
         /*{
             "property": property_name,
             "value": property_value
@@ -103,7 +103,7 @@ void mqtt_message_handler()
         ESP_LOGI(MQTT_TAG, "property_value:%d\n", property_value);
         char* command_variable = command_adapter(property_name);
         ESP_LOGI(MQTT_TAG, "command_variable:%s", command_variable);
-        // ·¢ËÍÖÁstm32
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½stm32
         int id = alloc_task_id();
         ESP_LOGI(MQTT_TAG, "id:%d", id);
         cJSON* ToStm32 = cJSON_CreateObject();
@@ -117,7 +117,7 @@ void mqtt_message_handler()
         ESP_LOGI(MQTT_TAG, "%s: %d", property_name, property_value);
     }
     else if (strcmp(find_char(topic, '/'), "command/exe") == 0) {
-        // Ö´ÐÐÃüÁî£¬Æäbody½á¹¹ÈçÏÂ£º
+        // Ö´ï¿½ï¿½ï¿½ï¿½ï¿½î£¬ï¿½ï¿½bodyï¿½á¹¹ï¿½ï¿½ï¿½Â£ï¿½
         /*{
         "command": command_name
         }*/
@@ -137,7 +137,7 @@ void mqtt_message_handler()
     }
 }
 
-// MQTT ÊÂ¼þ»Øµ÷º¯Êý
+// MQTT ï¿½Â¼ï¿½ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½
 static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_t* event)
 {
     esp_mqtt_client_handle_t client = event->client;
@@ -145,7 +145,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_t* event)
     // your_context_t *context = event->context;
     switch (event->event_id) {
     case MQTT_EVENT_CONNECTED:
-        //¶©ÔÄÃüÁî
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         msg_id = esp_mqtt_client_subscribe(client, COMMAND_RECV_TOPIC, 1);
         msg_id = esp_mqtt_client_subscribe(client, PROPERTY_SET_RECV_TOPIC, 1);
         ESP_LOGI(MQTT_TAG, "sent subscribe successful, msg_id=%d", msg_id);
@@ -167,13 +167,13 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_t* event)
         break;
     case MQTT_EVENT_DATA:
         ESP_LOGI(MQTT_TAG, "MQTT_EVENT_DATA");
-        // ×Ö·û´®½áÎ²´¦²¹0
+        // ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½Î²ï¿½ï¿½ï¿½ï¿½0
         strlcpy(topic, event->topic, event->topic_len + 1);
         strlcpy(msg, event->data, event->data_len+1);
         printf("TOPIC=%s\r\n", topic);
         printf("DATA=%s\r\n", msg);
         mqtt_message_handler(topic, msg);
-        // ·¢ËÍ·´À¡
+        // ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½
         //send_feedback(event->topic);
         break;
     case MQTT_EVENT_ERROR:
@@ -227,33 +227,33 @@ void create_mqtt_client()
 }
 
 
-// ÉÏ±¨ÊôÐÔTopicÊý¾Ý
+// ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½Topicï¿½ï¿½ï¿½ï¿½
 void mqttIntervalPost(esp_mqtt_client_handle_t client)
 {
     extern int coffee, milk, sugar, current_temp;
-    // ÉÏ±¨Êý¾Ý
+    // ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½
     cJSON* report = cJSON_CreateObject();
     cJSON_AddStringToObject(report, "device_id", device_id);
-    // ÉÏ±¨Ê£Óà¿§·ÈÁ¿
+    // ï¿½Ï±ï¿½Ê£ï¿½à¿§ï¿½ï¿½ï¿½ï¿½
     cJSON_AddStringToObject(report, "property_name", "coffee_rest");
     cJSON_AddNumberToObject(report, "value", coffee);
     char* json_Buf = cJSON_Print(report);
     esp_mqtt_client_publish(client, PROPERTY_REPORT_TOPIC, json_Buf, strlen(json_Buf), 0, 0);
-    // ÉÏ±¨Ê£ÓàÅ£ÄÌµÄÁ¿
+    // ï¿½Ï±ï¿½Ê£ï¿½ï¿½Å£ï¿½Ìµï¿½ï¿½ï¿½
     cJSON_DeleteItemFromObject(report, "property_name");
     cJSON_DeleteItemFromObject(report, "value");
     cJSON_AddStringToObject(report, "property_name", "milk_rest");
     cJSON_AddNumberToObject(report, "value", milk);
     json_Buf = cJSON_Print(report);
     esp_mqtt_client_publish(client, PROPERTY_REPORT_TOPIC, json_Buf, strlen(json_Buf), 0, 0);
-    // ÉÏ±¨Ê£ÓàÌÇË®µÄÁ¿
+    // ï¿½Ï±ï¿½Ê£ï¿½ï¿½ï¿½ï¿½Ë®ï¿½ï¿½ï¿½ï¿½
     cJSON_DeleteItemFromObject(report, "property_name");
     cJSON_DeleteItemFromObject(report, "value");
     cJSON_AddStringToObject(report, "property_name", "sugar_rest");
     cJSON_AddNumberToObject(report, "value", sugar);
     json_Buf = cJSON_Print(report);
     esp_mqtt_client_publish(client, PROPERTY_REPORT_TOPIC, json_Buf, strlen(json_Buf), 0, 0);
-    // ÉÏ±¨µ±Ç°ÎÂ¶È
+    // ï¿½Ï±ï¿½ï¿½ï¿½Ç°ï¿½Â¶ï¿½
     cJSON_DeleteItemFromObject(report, "property_name");
     cJSON_DeleteItemFromObject(report, "value");
     cJSON_AddStringToObject(report, "property_name", "current_temp");

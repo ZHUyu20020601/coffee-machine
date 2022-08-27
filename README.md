@@ -2,6 +2,7 @@
 
 Contributors: Zhu Yu, Shen Junyi, Song Mengxuan
 
+<<<<<<< HEAD
 ## 一、项目结构简述
 
 ### 1.1 项目流程图
@@ -281,3 +282,5 @@ uint8_t GetCurrentCfg(cfg_property);
 
 
 
+=======
+>>>>>>> main
