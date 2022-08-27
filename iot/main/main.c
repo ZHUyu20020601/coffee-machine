@@ -13,6 +13,9 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+// 一些量
+int coffee = 10, milk = 20, sugar = 30, current_temp = 40;
+#include "../_components/uart_component.h"
 #include "../_components/mqtt_component.h"
 
 #define ESP_WIFI_SSID CONFIG_ESP_WIFI_SSID
@@ -34,6 +37,26 @@ void nvs_init()
     }
     ESP_ERROR_CHECK(ret);
 }
+
+//void nvs_insert_str(const char* content, const char* key)
+//{
+//    // if exist, do not write. If not exist, write into nvs
+//    nvs_handle_t nvs_handle;
+//    esp_err_t err = nvs_open("mqtt_cfg", NVS_READWRITE, &nvs_handle);
+//    char* out_value = (char*)malloc(128);
+//    err = nvs_get_str(nvs_handle, key, out_value, strlen(content));
+//    switch (err) {
+//    case ESP_OK:
+//        // 该值存在
+//        return;
+//    case ESP_ERR_NVS_NOT_FOUND:
+//        // 该值不存在，写入
+//        ESP_ERROR_CHECK(nvs_set_str(nvs_handle, key, content));
+//        ESP_ERROR_CHECK(nvs_commit(nvs_handle));
+//    }
+//    ESP_ERROR_CHECK(err);
+//    nvs_close(nvs_handle);
+//}
 
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
@@ -95,6 +118,12 @@ void app_main(void)
 {
     nvs_init();
     station_init();
+    // get basic information like device_id, project_id, etc -- from aliyun server
     // create a task receiving and sending properties with platform
-    xTaskCreate(mqtt_loop, "mqtt", 20480, NULL, 1, NULL);
+    xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT, 0, 0, portMAX_DELAY);
+    xTaskCreate(mqtt_loop, "mqtt", 20480, NULL, 2, NULL);
+    uart_start();
+    while (1) {
+        vTaskDelay(100);
+    }
 }

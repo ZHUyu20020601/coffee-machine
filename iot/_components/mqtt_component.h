@@ -3,50 +3,65 @@
 #include <string.h>
 #include <stdlib.h>
 #include "mqtt_client.h"
-#include "sha256.h"
-#include "hmac_sha256.h"
 #include "cJSON.h"
 
-//»ªÎªÔÆÉÏÔÆÌõ¼þ
-#define server_ip "mqtt://a16199eec3.iot-mqtts.cn-north-4.myhuaweicloud.com"
-#define device_id "62d00d586b9813541d5166a2_0001"
-#define device_secret "coffee_machine"
-#define this_time "2022071415"
-#define pwd "aff85855e54e9dee83218e4c78b1f0489d9e35c53ab775cec97d72d5dbeca965"
+//ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define server_ip "mqtt://39.106.12.138"
+#define device_id "CoffeeMachine"
+#define user_name "neworld2020"
+#define pwd "774225688"
 #define mqtt_port 1883
-// ¼ÓÃÜËã·¨ÅäÖÃ
-#define SHA256HMAC_SIZE 256
-#define MAX_SIZE 64
+// ï¿½ï¿½ï¿½ï¿½ï¿½ã·¨ï¿½ï¿½ï¿½ï¿½
 
-//ÊôÐÔÉÏ±¨Topic---·¢²¼
-#define HUAWEI_TOPIC_PROP_POST "$oc/devices/" device_id "/sys/properties/report"
-//ÃüÁî½ÓÊÕTopic---¶©ÔÄ
-#define HUAWEI_TOPIC_PROP_SET "$oc/devices/" device_id "/sys/commands/#"
-    //Éè±¸±¨¾¯ÐÅÏ¢---·¢²¼Óë¶©ÔÄ
-#define HUAWEI_TOPIC_PROP_ERROR "$oc/devices/" device_id "/user/error"
-//ÃüÁî·´À¡ÐÅÏ¢
-#define HUAWEI_COMMAND_FEEDBACK "$oc/devices/" device_id "/sys/commands/response/request_id="
+//ï¿½ï¿½ï¿½ï¿½ï¿½Ï±ï¿½Topic---ï¿½ï¿½ï¿½ï¿½
+#define PROPERTY_REPORT_TOPIC device_id "/property/report"
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Topic---ï¿½ï¿½ï¿½ï¿½
+#define COMMAND_RECV_TOPIC device_id "/command/exe"
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½Topic---ï¿½ï¿½ï¿½ï¿½
+#define PROPERTY_SET_RECV_TOPIC device_id "/property/set"
 
 #define MQTT_TAG "MQTT"
 
 esp_mqtt_client_handle_t client;
+char topic[100];
+char msg[200];
 
-// ¼ÓÃÜËã·¨
-static int hmac256(const char* signcontent, int length, char* sign)
+// ï¿½Ö·ï¿½ï¿½ï¿½ï¿½Òºï¿½ï¿½ï¿½
+const char* find_char(const char* str, char c)
 {
-    uint8_t hashCode[SHA256HMAC_SIZE];
-    hmac_sha256(this_time, strlen(this_time), signcontent, strlen(signcontent), hashCode,
-        sizeof(hashCode));
-    int c = 0;
-    for (uint8_t i = 0; i < SHA256HMAC_SIZE; ++i)
-    {
-        sign[c] = "0123456789abcdef"[hashCode[i] >> 4]; c++;
-        sign[c] = "0123456789abcdef"[hashCode[i] & 0xf]; c++;
-    }// dec -> hex
-    return 1;
+    for (int i = 0; i < strlen(str); i++) {
+        if (str[i] == c) {
+            return &str[i + 1];
+        }
+    }
+    return NULL;
 }
 
-// Òì³£´¦Àíº¯Êý
+// ï¿½ï¿½mqttï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½STM32ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+char* command_adapter(const char* origin)
+{
+    /*add_coffee -> coffee, add_sugar -> sugar, add_milk -> milk, target_temp -> temp
+    */
+    if (strcmp(origin, "add_coffee") == 0) {
+        return "coffee";
+    }
+    else if (strcmp(origin, "add_sugar") == 0) {
+        return "sugar";
+    }
+    else if (strcmp(origin, "add_milk") == 0) {
+        return "milk";
+    }
+    else if (strcmp(origin, "target_temp") == 0) {
+        return "temp";
+    }
+    else {
+        // ï¿½ï¿½Ó¦ï¿½Ã³ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½
+        ESP_LOGE(MQTT_TAG, "A Unexpected Command is Recved: %s", origin);
+        esp_restart();
+    }
+}
+
+// ï¿½ì³£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 static void log_error_if_nonzero(const char* message, int error_code)
 {
     if (error_code != 0) {
@@ -54,59 +69,75 @@ static void log_error_if_nonzero(const char* message, int error_code)
     }
 }
 
-void mqtt_command_handler(const char* command)
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ID
+int alloc_task_id()
 {
-    // convert char* to json
-    cJSON* root = cJSON_Parse(command);
-    cJSON* paras = cJSON_GetObjectItem(root, "paras");
-    char* cmd_name = cJSON_GetObjectItem(root, "command_name")->valuestring;
-    ESP_LOGI(MQTT_TAG, "Command name:%s", cmd_name);
-    if (strcmp(cmd_name, "set-add-coffee") == 0) {
-        // ÉèÖÃ¿§·È¼ÓÈëµÄÁ¿
-        int coffee = cJSON_GetObjectItem(paras, "coffee")->valueint;
-        ESP_LOGI(MQTT_TAG, "To STM32: Coffee %d ml", coffee);
-    }
-    else if (strcmp(cmd_name, "set-add-milk") == 0) {
-        int milk = cJSON_GetObjectItem(paras, "milk")->valueint;
-        ESP_LOGI(MQTT_TAG, "To STM32: Milk %d ml", milk);
-    }
-    else if (strcmp(cmd_name, "set-add-sugar") == 0) {
-        int sugar = cJSON_GetObjectItem(paras, "sugar")->valueint;
-        ESP_LOGI(MQTT_TAG, "To STM32: Sugar %d ml", sugar);
-    }
-    else if (strcmp(cmd_name, "set-target-temp") == 0) {
-        int temp = cJSON_GetObjectItem(paras, "temp")->valueint;
-        ESP_LOGI(MQTT_TAG, "To STM32: Temp %d Celsius", temp);
-    }
+    static int id = 0;
+    return id++;
 }
 
-const char* find_char(const char* str, char c)
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½stm32 -- ï¿½ï¿½Ê±Ê¹ï¿½ï¿½
+void send_to_stm32(const char* msg)
 {
-    for (int i = 0; i < strlen(str); i++) {
-        if (str[i] == c) {
-            return &str[i+1];
+    ESP_LOGI(MQTT_TAG, "send to stm32: %s", msg);
+    extern char TX_CONTENT[1024];
+    strcpy(TX_CONTENT, msg);
+}
+
+void mqtt_message_handler()
+{
+    ESP_LOGI("HANDLER", "topic=%s", topic);
+    ESP_LOGI("HANDLER", "msg=%s", msg);
+    if (strcmp(find_char(topic, '/'), "property/set") == 0) {
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½bodyï¿½ï¿½Ê½ï¿½ï¿½ï¿½Â£ï¿½
+        /*{
+            "property": property_name,
+            "value": property_value
+        }*/
+        ESP_LOGI(MQTT_TAG, "json: %s", msg);
+        cJSON* root = cJSON_Parse(msg);
+        ESP_LOGI(MQTT_TAG, "msg:%s\n", msg);
+        char* property_name = cJSON_GetObjectItem(root, "property")->valuestring;
+        ESP_LOGI(MQTT_TAG, "property_name:%s\n", property_name);
+        int property_value = cJSON_GetObjectItem(root, "value")->valueint;
+        ESP_LOGI(MQTT_TAG, "property_value:%d\n", property_value);
+        char* command_variable = command_adapter(property_name);
+        ESP_LOGI(MQTT_TAG, "command_variable:%s", command_variable);
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½stm32
+        int id = alloc_task_id();
+        ESP_LOGI(MQTT_TAG, "id:%d", id);
+        cJSON* ToStm32 = cJSON_CreateObject();
+        cJSON_AddStringToObject(ToStm32, "type", "command");
+        cJSON_AddNumberToObject(ToStm32, "id", id);
+        cJSON* command = cJSON_CreateObject();
+        cJSON_AddStringToObject(command, "variable", command_variable);
+        cJSON_AddNumberToObject(command, "value", property_value);
+        cJSON_AddItemToObject(ToStm32, "command", command);
+        send_to_stm32(cJSON_Print(ToStm32));
+        ESP_LOGI(MQTT_TAG, "%s: %d", property_name, property_value);
+    }
+    else if (strcmp(find_char(topic, '/'), "command/exe") == 0) {
+        // Ö´ï¿½ï¿½ï¿½ï¿½ï¿½î£¬ï¿½ï¿½bodyï¿½á¹¹ï¿½ï¿½ï¿½Â£ï¿½
+        /*{
+        "command": command_name
+        }*/
+        cJSON* root = cJSON_Parse(msg);
+        char* command = cJSON_GetObjectItem(root, "command")->valuestring;
+        cJSON* ToStm32 = cJSON_CreateObject();
+        int id = alloc_task_id();
+        if (strcmp(command, "StartMaking") == 0) {
+            cJSON_AddStringToObject(ToStm32, "type", "start");
         }
+        else if (strcmp(command, "EmergentStop") == 0) {
+            cJSON_AddStringToObject(ToStm32, "type", "emergent stop");
+        }
+        cJSON_AddNumberToObject(ToStm32, "id", id);
+        send_to_stm32(cJSON_Print(ToStm32));
+        ESP_LOGI(MQTT_TAG, "Command: %s", command);
     }
-    return NULL;
 }
 
-void send_feedback(const char* topic)
-{
-    // ·¢ËÍ·´À¡
-    char* dest = (char*)malloc(200);
-    memset(dest, 0, 200);
-    const char* request_id = find_char(topic, '=');
-    if (request_id == NULL) {
-        ESP_LOGE(MQTT_TAG, "Î´ÕÒµ½×Ö·û´®");
-    }
-    strcat(dest, HUAWEI_COMMAND_FEEDBACK);
-    strcat(dest, request_id);
-    ESP_LOGI(MQTT_TAG, "%s", dest);
-    esp_mqtt_client_publish(client, dest, NULL, 0, 0, 0);
-    free(dest);
-}
-
-// MQTT ÊÂ¼þ»Øµ÷º¯Êý
+// MQTT ï¿½Â¼ï¿½ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½
 static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_t* event)
 {
     esp_mqtt_client_handle_t client = event->client;
@@ -114,8 +145,9 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_t* event)
     // your_context_t *context = event->context;
     switch (event->event_id) {
     case MQTT_EVENT_CONNECTED:
-        //¶©ÔÄÃüÁî
-        msg_id = esp_mqtt_client_subscribe(client, HUAWEI_TOPIC_PROP_SET, 1);
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        msg_id = esp_mqtt_client_subscribe(client, COMMAND_RECV_TOPIC, 1);
+        msg_id = esp_mqtt_client_subscribe(client, PROPERTY_SET_RECV_TOPIC, 1);
         ESP_LOGI(MQTT_TAG, "sent subscribe successful, msg_id=%d", msg_id);
         break;
     case MQTT_EVENT_DISCONNECTED:
@@ -135,11 +167,14 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_t* event)
         break;
     case MQTT_EVENT_DATA:
         ESP_LOGI(MQTT_TAG, "MQTT_EVENT_DATA");
-        printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
-        printf("DATA=%.*s\r\n", event->data_len, event->data);
-        mqtt_command_handler(event->data);
-        // ·¢ËÍ·´À¡
-        send_feedback(event->topic);
+        // ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½Î²ï¿½ï¿½ï¿½ï¿½0
+        strlcpy(topic, event->topic, event->topic_len + 1);
+        strlcpy(msg, event->data, event->data_len+1);
+        printf("TOPIC=%s\r\n", topic);
+        printf("DATA=%s\r\n", msg);
+        mqtt_message_handler(topic, msg);
+        // ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½
+        //send_feedback(event->topic);
         break;
     case MQTT_EVENT_ERROR:
         ESP_LOGI(MQTT_TAG, "MQTT_EVENT_ERROR");
@@ -170,13 +205,13 @@ static void mqtt_event_handler(void* handler_args,
     mqtt_event_handler_cb((esp_mqtt_event_t*)event_data);
 }
 
-void create_huaweiyun_mqtt_client()
+void create_mqtt_client()
 {
     const esp_mqtt_client_config_t mqtt_cfg = {
         .uri = server_ip,
         .port = mqtt_port,
-        .client_id = (device_id "_0_0_" this_time),
-        .username = device_id,
+        .client_id = device_id,
+        .username = user_name,
         .password = pwd,
         .disable_auto_reconnect = false,
     };
@@ -192,26 +227,49 @@ void create_huaweiyun_mqtt_client()
 }
 
 
-// ÉÏ±¨ÊôÐÔTopicÊý¾Ý
-int mqttIntervalPost(esp_mqtt_client_handle_t client)
+// ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½Topicï¿½ï¿½ï¿½ï¿½
+void mqttIntervalPost(esp_mqtt_client_handle_t client)
 {
-    /*char jsonBuf[200];
-    memset(jsonBuf, 0, 200);
-    
-    int msg_id = esp_mqtt_client_publish(client, HUAWEI_TOPIC_PROP_POST, jsonBuf, 0, 0, 0);
-    return msg_id;*/
-    return 0;
+    extern int coffee, milk, sugar, current_temp;
+    // ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½
+    cJSON* report = cJSON_CreateObject();
+    cJSON_AddStringToObject(report, "device_id", device_id);
+    // ï¿½Ï±ï¿½Ê£ï¿½à¿§ï¿½ï¿½ï¿½ï¿½
+    cJSON_AddStringToObject(report, "property_name", "coffee_rest");
+    cJSON_AddNumberToObject(report, "value", coffee);
+    char* json_Buf = cJSON_Print(report);
+    esp_mqtt_client_publish(client, PROPERTY_REPORT_TOPIC, json_Buf, strlen(json_Buf), 0, 0);
+    // ï¿½Ï±ï¿½Ê£ï¿½ï¿½Å£ï¿½Ìµï¿½ï¿½ï¿½
+    cJSON_DeleteItemFromObject(report, "property_name");
+    cJSON_DeleteItemFromObject(report, "value");
+    cJSON_AddStringToObject(report, "property_name", "milk_rest");
+    cJSON_AddNumberToObject(report, "value", milk);
+    json_Buf = cJSON_Print(report);
+    esp_mqtt_client_publish(client, PROPERTY_REPORT_TOPIC, json_Buf, strlen(json_Buf), 0, 0);
+    // ï¿½Ï±ï¿½Ê£ï¿½ï¿½ï¿½ï¿½Ë®ï¿½ï¿½ï¿½ï¿½
+    cJSON_DeleteItemFromObject(report, "property_name");
+    cJSON_DeleteItemFromObject(report, "value");
+    cJSON_AddStringToObject(report, "property_name", "sugar_rest");
+    cJSON_AddNumberToObject(report, "value", sugar);
+    json_Buf = cJSON_Print(report);
+    esp_mqtt_client_publish(client, PROPERTY_REPORT_TOPIC, json_Buf, strlen(json_Buf), 0, 0);
+    // ï¿½Ï±ï¿½ï¿½ï¿½Ç°ï¿½Â¶ï¿½
+    cJSON_DeleteItemFromObject(report, "property_name");
+    cJSON_DeleteItemFromObject(report, "value");
+    cJSON_AddStringToObject(report, "property_name", "current_temp");
+    cJSON_AddNumberToObject(report, "value", current_temp);
+    json_Buf = cJSON_Print(report);
+    esp_mqtt_client_publish(client, PROPERTY_REPORT_TOPIC, json_Buf, strlen(json_Buf), 0, 0);
 }
 
 
 void mqtt_loop(void* pv)
 {
-    create_huaweiyun_mqtt_client();
-    esp_mqtt_client_subscribe(client, HUAWEI_TOPIC_PROP_SET, 0);
+    create_mqtt_client();
     while (1)
     {
         mqttIntervalPost(client);
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
+        vTaskDelay(10000 / portTICK_PERIOD_MS);
     }
 }
 
