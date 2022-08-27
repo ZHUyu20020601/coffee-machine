@@ -53,7 +53,12 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+//'=1'å…¨å±€debugæ¨¡å¼å¼€å¯
+//åœ¨debugæ—¶ä½¿ç”¨uart1é€šä¿¡ï¼Œå¦åˆ™ä½¿ç”¨uart3
 int DEBUG = 1;
+
+//æ¸©åº¦ä¼ æ„Ÿå™¨æ¨¡å—ç»“æ„ä½“
+onewire tempSensor = {GPIOC,GPIO_PIN_12};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -65,8 +70,8 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-extern uint8_t rx_buffer[200];   //½ÓÊÕÊı¾İµÄÊı×é
-
+extern uint8_t rx_buffer[200];   //æ¥æ”¶æ•°æ®çš„æ•°æ?
+extern uint8_t rx_buffer_3[200];
 /* USER CODE END 0 */
 
 /**
@@ -98,18 +103,30 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USART3_UART_Init();
   MX_USART2_UART_Init();
   MX_USART1_UART_Init();
+  MX_TIM6_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 	
-	__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //¿ªÆô¿ÕÏĞÖĞ¶Ï
-	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);  //¿ªÆôDMA½ÓÊÕÖĞ¶Ï
-
-	//ensure all relays are shut
-	//shut_all_relay();
+	__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //å¼?å¯ç©ºé—²ä¸­æ–?
+	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);  //å¼?å¯DMAæ¥æ”¶ä¸­æ–­
+	
+	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);  //å¼?å¯ç©ºé—²ä¸­æ–?
+	HAL_UART_Receive_DMA(&huart3,rx_buffer,200);  //å¼?å¯DMAæ¥æ”¶ä¸­æ–­
+	
+	/*
+	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);  //å¼?å¯ç©ºé—²ä¸­æ–?
+	HAL_UART_Receive_DMA(&huart3,rx_buffer,200);  //å¼?å¯DMAæ¥æ”¶ä¸­æ–­
+	*/
+	
+	//å…³é—­æ‰€æœ‰ç»§ç”µå™¨
+	shut_all_relay();
+	//è‡ªå®šä¹‰ç³»ç»Ÿåˆå§‹åŒ–
+	InitSystem();
+	
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -123,41 +140,9 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	
-	//float dist = 0;;
-	//dist = get_coffee_dist();
-	//uint32_t n = 0;
-	//HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
-	//HAL_Delay(100);
-	
-	
-	//my_uart1_enable_interrupt();
-	
-	
-	InitSystem();
-	
+	//åœ¨è¿™é‡Œä»€ä¹ˆéƒ½ä¸åš
   while (1)
   {
-		
-	
-		//my_uart1_send_string("test123\r\n");
-		//HAL_Delay(10);
-		
-		//my_uart1_enable_interrupt();
-		//HAL_UART_RxCpltCallback(&huart1);
-		
-		/*
-		dist = get_sugar_dist();
-		printf("distance is %.2f cm.\r\n",dist);
-		HAL_Delay(1000);
-		*/
-		
-		//cJSON²âÊÔ
-		//my_uart1_send_string((uint8_t*)json_str);
-		//my_uart1_send_data((uint8_t*)json_str, strlen(json_str));
-		//printf(json_str);
-		//cJSON_Print(cjson);
-		//HAL_Delay(100);
-		
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -4,6 +4,7 @@
 
 #include "main.h"
 #include "tim.h"
+#include "tempSensor.h"
 
 float get_coffee_dist(void);
 float get_milk_dist(void);
@@ -18,5 +19,8 @@ uint32_t milk_time_cap(void);
 uint32_t sugar_time_cap(void);
 
 float distance(uint32_t us);
+
+//tempurature
+int ds18b20_readtemperature(onewire *ptr);
 
 #endif

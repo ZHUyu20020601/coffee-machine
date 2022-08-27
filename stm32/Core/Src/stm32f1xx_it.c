@@ -44,7 +44,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -58,19 +57,26 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
+extern DMA_HandleTypeDef hdma_usart3_rx;
+extern DMA_HandleTypeDef hdma_usart3_tx;
 extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart3;
 extern TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN EV */
 
-extern uint8_t rx_buffer[200];   //½ÓÊÕÊı¾İµÄÊı×é
-extern volatile uint8_t rx_len; //½ÓÊÕÊı¾İµÄ³¤¶È
-extern volatile uint8_t recv_end_flag; //½ÓÊÕ½áÊø±êÖ¾Î»
+extern uint8_t rx_buffer[200];   //æ¥æ”¶æ•°æ®çš„æ•°ç»?
+extern volatile uint8_t rx_len; //æ¥æ”¶æ•°æ®çš„é•¿åº?
+extern volatile uint8_t recv_end_flag; //æ¥æ”¶ç»“æŸæ ‡å¿—ä½?
 //extern uint8_t rx_log[30];
+
+extern uint8_t rx_buffer_3[200];   //æ¥æ”¶æ•°æ®çš„æ•°ç»?
+extern volatile uint8_t rx_len_3; //æ¥æ”¶æ•°æ®çš„é•¿åº?
+extern volatile uint8_t recv_end_flag_3; //æ¥æ”¶ç»“æŸæ ‡å¿—ä½?
+
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -172,6 +178,34 @@ void DebugMon_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles DMA1 channel2 global interrupt.
+  */
+void DMA1_Channel2_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel2_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel2_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart3_tx);
+  /* USER CODE BEGIN DMA1_Channel2_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 channel3 global interrupt.
+  */
+void DMA1_Channel3_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel3_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel3_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart3_rx);
+  /* USER CODE BEGIN DMA1_Channel3_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel3_IRQn 1 */
+}
+
+/**
   * @brief This function handles DMA1 channel4 global interrupt.
   */
 void DMA1_Channel4_IRQHandler(void)
@@ -214,20 +248,6 @@ void TIM1_UP_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles TIM3 global interrupt.
-  */
-void TIM3_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM3_IRQn 0 */
-
-  /* USER CODE END TIM3_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim3);
-  /* USER CODE BEGIN TIM3_IRQn 1 */
-
-  /* USER CODE END TIM3_IRQn 1 */
-}
-
-/**
   * @brief This function handles TIM4 global interrupt.
   */
 void TIM4_IRQHandler(void)
@@ -251,31 +271,74 @@ void USART1_IRQHandler(void)
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
-	uint8_t tmp_flag =__HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE); //»ñÈ¡IDLE×´Ì¬
-	if((tmp_flag != RESET))//ÅĞ¶Ï½ÓÊÕÊÇ·ñ½áÊø
+	uint8_t tmp_flag =__HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE); //è·å–IDLEçŠ¶æ??
+	if((tmp_flag != RESET))//åˆ¤æ–­æ¥æ”¶æ˜¯å¦ç»“æŸ
 		{ 
-      // recv_end_flag = 1; //½ÓÊÕ½áÊø
-      __HAL_UART_CLEAR_IDLEFLAG(&huart1);//Çå³ı±êÖ¾Î»
+      // recv_end_flag = 1; //æ¥æ”¶ç»“æŸ
+      __HAL_UART_CLEAR_IDLEFLAG(&huart1);//æ¸…é™¤æ ‡å¿—ä½?
 			
       HAL_UART_DMAStop(&huart1); 
 			
       uint8_t temp=__HAL_DMA_GET_COUNTER(&hdma_usart1_rx);    
 			
-      rx_len =200-temp; //¼ÆËãÊı¾İ³¤¶È
+      rx_len =200-temp; //è®¡ç®—æ•°æ®é•¿åº¦
 			
-      //HAL_UART_Transmit_DMA(&huart1, rx_buffer,rx_len);//·¢ËÍÊı¾İ
+      //HAL_UART_Transmit_DMA(&huart1, rx_buffer,rx_len);//å‘é?æ•°æ?
 			
 			//HAL_UART_Transmit_DMA(&huart1, "recieved msg\n", 14);
 			
-			parse_msg(rx_buffer);//´¦Àí½ÓÊÜµ½µÄÊı¾İ
+			parse_msg(rx_buffer);//å¤„ç†æ¥å—åˆ°çš„æ•°æ®
 			
 			//HAL_UART_Transmit_DMA(&huart1, rx_log, 14);
 			
 			uart1_start_dma();
-     //HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//¿ªÆôDMA
+     //HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//å¼?å¯DMA
 		}
 
   /* USER CODE END USART1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART3 global interrupt.
+  */
+void USART3_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART3_IRQn 0 */
+
+  /* USER CODE END USART3_IRQn 0 */
+  HAL_UART_IRQHandler(&huart3);
+  /* USER CODE BEGIN USART3_IRQn 1 */
+/* USER CODE BEGIN USART1_IRQn 0 */
+
+  /* USER CODE END USART1_IRQn 0 */
+  HAL_UART_IRQHandler(&huart3);
+  /* USER CODE BEGIN USART1_IRQn 1 */
+	uint8_t tmp_flag =__HAL_UART_GET_FLAG(&huart3,UART_FLAG_IDLE); //è·å–IDLEçŠ¶æ¿¿
+	if((tmp_flag != RESET))//åˆ¤æ–­æ¥æ”¶æ˜¯å¦ç»“æŸ
+		{ 
+      // recv_end_flag = 1; //æ¥æ”¶ç»“æŸ
+      __HAL_UART_CLEAR_IDLEFLAG(&huart3);//æ¸…é™¤æ ‡å¿—ä½¿
+			
+      HAL_UART_DMAStop(&huart3); 
+			
+      uint8_t temp=__HAL_DMA_GET_COUNTER(&hdma_usart3_rx);    
+			
+      rx_len =200-temp; //è®¡ç®—æ•°æ®é•¿åº¦
+			
+      //HAL_UART_Transmit_DMA(&huart1, rx_buffer,rx_len);//å‘é¿æ•°æ¿
+			
+			//HAL_UART_Transmit_DMA(&huart1, "recieved msg\n", 14);
+			
+			parse_msg(rx_buffer_3);//å¤„ç†æ¥å—åˆ°çš„æ•°æ®
+			
+			//HAL_UART_Transmit_DMA(&huart1, rx_log, 14);
+			
+			uart3_start_dma();
+     //HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//å¼¿å¯DMA
+		}
+
+  /* USER CODE END USART1_IRQn 1 */
+  /* USER CODE END USART3_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

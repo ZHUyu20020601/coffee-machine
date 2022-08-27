@@ -3,25 +3,31 @@
 ZHUYU
 2022/7/25
 
-¸ÃÎÄ¼ş¸ºÔğµ÷¿ØÏµÍ³µÄ¹¤×÷×´Ì¬£¬Éè¶¨¡¢´æ´¢ºÍµ÷ÓÃ¿§·È¼ÓÁÏÅä±ÈµÄÔ¤Éè
-ÔÚÏµÍ³Æô¶¯Ê±µ÷ÓÃInitSystem()³õÊ¼»¯ËùÓĞ²ÎÊı£¬Çå¿Õbuf¡£
-½«SystemState,SystemCurrenCfg,tempCurrent¾ù¶¨ÒåÎªstatic£¬ÔÚÎÄ¼şÍâ
-ÊÓÎªÖ»¶Á¡£
-Èç¹ûÒªÉè¶¨¼ÓÁÏ²ÎÊı£¬Ö»ĞèÒªÏÈµ÷ÓÃSetNextCfg(...)Éè¶¨ËùÓĞ²ÎÊı£¬È»ºó
-µ÷ÓÃAddBuffer()½«tempCfgÑ¹Èë»º´æÖĞ¼´¿É
-ËùÓĞÉè¶¨µÄ¼ÓÁÏ²ÎÊı²»»áÖ±½ÓÓ¦ÓÃ£¬¶øÊÇÏÈ¾­¹ıbuf£¬×ñÑ­FIFO¶ÁÈ¡
-ÈôÒª¶ÁÈ¡bufµ½SystemCurrentCfgÖĞ£¬µ÷ÓÃSetCurrentCfg()
+è¯¥æ–‡ä»¶è´Ÿè´£è°ƒæ§ç³»ç»Ÿçš„å·¥ä½œçŠ¶æ€ï¼Œè®¾å®šã€å­˜å‚¨å’Œè°ƒç”¨å’–å•¡åŠ æ–™é…æ¯”çš„é¢„è®¾
+åœ¨ç³»ç»Ÿå¯åŠ¨æ—¶è°ƒç”¨InitSystem()åˆå§‹åŒ–æ‰€æœ‰å‚æ•°ï¼Œæ¸…ç©ºbufã€‚
+å°†SystemState,SystemCurrenCfg,tempCurrentå‡å®šä¹‰ä¸ºstaticï¼Œåœ¨æ–‡ä»¶å¤–
+è§†ä¸ºåªè¯»ã€‚
+å¦‚æœè¦è®¾å®šåŠ æ–™å‚æ•°ï¼Œåªéœ€è¦å…ˆè°ƒç”¨SetNextCfg(...)è®¾å®šæ‰€æœ‰å‚æ•°ï¼Œç„¶å
+è°ƒç”¨AddBuffer()å°†tempCfgå‹å…¥ç¼“å­˜ä¸­å³å¯
+æ‰€æœ‰è®¾å®šçš„åŠ æ–™å‚æ•°ä¸ä¼šç›´æ¥åº”ç”¨ï¼Œè€Œæ˜¯å…ˆç»è¿‡bufï¼Œéµå¾ªFIFOè¯»å–
+è‹¥è¦è¯»å–bufåˆ°SystemCurrentCfgä¸­ï¼Œè°ƒç”¨SetCurrentCfg()
 
 e.g.
 
-InitSystem(); //Æô¶¯
-SetNextCfg(coffee,40); //Éè¶¨¼ÓÁÏ
+InitSystem(); //å¯åŠ¨
+SetNextCfg(coffee,40); //è®¾å®šåŠ æ–™
 SetNextCfg(milk,20);
 SetNextCfg(sugar,10);
 SetNextCfg(temp,30);
-AddBuffer(); //¼ÓÈë»º´æ
-SetCurrentCfg(); //¶ÁÈ¡»º´æÉè¶¨
-SetStatusMaking(); //½øÈë¹¤×÷×´Ì¬
+//AddBuffer(); //åŠ å…¥ç¼“å­˜
+//è°¨æ…èµ·è§æœ€å¥½ä½¿ç”¨ 
+char* msg = AddBuffer();
+if(msg != NULL)
+	response_error(id, msg);
+else
+	response_ok(id);
+SetCurrentCfg(); //è¯»å–ç¼“å­˜è®¾å®š
+SetStatusMaking(); //è¿›å…¥å·¥ä½œçŠ¶æ€
 
 
 */
@@ -32,50 +38,52 @@ SetStatusMaking(); //½øÈë¹¤×÷×´Ì¬
 #include "main.h"
 
 
-/*×´Ì¬»ú*/
+/*çŠ¶æ€æœº*/
 typedef enum { Waiting, Making, Error } SystemStatus;
 
 typedef enum {coffee, sugar, milk, temp} cfg_property;
 
 typedef struct {
-	uint8_t coffee;	// ¿§·ÈÔ­½¬µÄ¼ÓÈëÁ¿
-	uint8_t sugar;	// ÌÇË®µÄ¼ÓÈëÁ¿
-	uint8_t milk;	// Å£ÄÌµÄ¼ÓÈëÁ¿
-	uint8_t temp;	// Éè¶¨µÄ¼ÓÈÈÎÂ¶È
+	uint8_t coffee;	// å’–å•¡åŸæµ†çš„åŠ å…¥é‡
+	uint8_t sugar;	// ç³–æ°´çš„åŠ å…¥é‡
+	uint8_t milk;	// ç‰›å¥¶çš„åŠ å…¥é‡
+	uint8_t temp;	// è®¾å®šçš„åŠ çƒ­æ¸©åº¦
 } SystemCfg;
 
 typedef struct {
-	SystemCfg buffer[5]; //´æ´¢5±­¿§·ÈµÄÔ¤Éè
-	int rear; //±ê¼ÇÏÂÒ»¸ö¿ÉÒÔÌîÈëµÄ¿ÕÎ»
+	SystemCfg buffer[5]; //å­˜å‚¨5æ¯å’–å•¡çš„é¢„è®¾
+	int rear; //æ ‡è®°ä¸‹ä¸€ä¸ªå¯ä»¥å¡«å…¥çš„ç©ºä½
 }	SystemCfgBuf;
 
 
-/*×´Ì¬º¯Êı*/
+/*çŠ¶æ€å‡½æ•°*/
 
-//³õÊ¼»¯ËùÓĞ×´Ì¬
+//åˆå§‹åŒ–æ‰€æœ‰çŠ¶æ€
 void InitSystem(void);
 void InitCfg(SystemCfg* cfg);
 
-//¶ÁÈ¡µ±Ç°×´Ì¬
+//è¯»å–å½“å‰çŠ¶æ€
 SystemStatus GetSystemStatus(void);
 
-//ÉèÖÃÏµÍ³µ±Ç°×´Ì¬
+//è®¾ç½®ç³»ç»Ÿå½“å‰çŠ¶æ€
 void SetStatusMaking(void);
 void SetStatusError(void);
 void SetStatusWaiting(void);
 
-//ÉèÖÃ¼ÓÁÏÊı¾İµ½tempCfgÖĞ
+//è®¾ç½®åŠ æ–™æ•°æ®åˆ°tempCfgä¸­
 void SetNextCfg(cfg_property, uint8_t);
 
-//µÈ´ıtempCfgÉèÖÃÍê±Ïºó´æÈëbuffer
+//ç­‰å¾…tempCfgè®¾ç½®å®Œæ¯•åå­˜å…¥buffer
 char* AddBuffer(void);
 int buf_empty(void);
 
-//¶ÁÈ¡bufÔ¤Éè£¬Éè¶¨ÏÂÒ»±­¿§·ÈµÄ²ÎÊı
+//è¯»å–bufé¢„è®¾ï¼Œè®¾å®šä¸‹ä¸€æ¯å’–å•¡çš„å‚æ•°
 char* SetCurrentCfg(void);
 uint8_t GetCurrentCfg(cfg_property);
+uint8_t GetNextCfg(cfg_property);
+uint8_t GetTempCfg(cfg_property);
 
-/*¹¤¾ßº¯Êı*/
+/*å·¥å…·å‡½æ•°*/
 //void HAL_Delay_us(uint32_t us);
 //void reset_printf(int uart);
 

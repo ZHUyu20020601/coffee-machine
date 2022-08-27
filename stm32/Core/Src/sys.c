@@ -1,6 +1,8 @@
 #include "sys.h"
 #include "stdio.h"
 
+extern int DEBUG;
+
 static SystemStatus SystemCurrentStatus = Waiting;
 static SystemCfg SystemCurrentCfg = { 0, 0, 0, 0 };
 static SystemCfg tempCfg = {0, 0, 0, 0};
@@ -15,7 +17,13 @@ void InitSystem(void){
 	for(i = 0; i < 5; i++)
 		InitCfg(&(buf.buffer[i]));
 	buf.rear = 0;
+	if(DEBUG)
+		HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
+	else
+		HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
+	
 }
+	
 
 void InitCfg(SystemCfg* cfg){
 	cfg->coffee = 0;
@@ -65,7 +73,7 @@ char* AddBuffer(void){
 
 char* SetCurrentCfg(void){
 	int i = 0;
-	//������ڵȴ�״̬��ֱ�Ӷ�ȡ
+	//如果处于等待状态，直接读取
 	if(Waiting == GetSystemStatus()){
 		if(buf.rear == 0)
 			return "buf empty!";
@@ -77,7 +85,7 @@ char* SetCurrentCfg(void){
 			buf.rear--;
 		}
 	}
-	//������ڹ���״̬��ʲô������
+	//如果处于工作状态则什么都不做
 	return NULL;
 }
 
@@ -93,6 +101,32 @@ uint8_t GetCurrentCfg(cfg_property property){
 		return SystemCurrentCfg.temp;
 	return 0;
 }
+
+uint8_t GetNextCfg(cfg_property property){
+	if(property == coffee)
+		return buf.buffer[0].coffee;
+	if(property == milk)
+		return buf.buffer[0].milk;
+	if(property == sugar)
+		return buf.buffer[0].sugar;
+	if(property == temp)
+		return buf.buffer[0].temp;
+	return 0;
+	
+}
+
+uint8_t GetTempCfg(cfg_property property){
+		if(property == coffee)
+		return tempCfg.coffee;
+	if(property == milk)
+		return tempCfg.milk;
+	if(property == sugar)
+		return tempCfg.sugar;
+	if(property == temp)
+		return tempCfg.temp;
+	return 0;
+}
+
 
 int buf_empty(void){
 	if(buf.rear == 0)
