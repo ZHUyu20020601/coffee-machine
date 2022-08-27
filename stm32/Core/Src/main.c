@@ -53,7 +53,11 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+//'=1'全局debug模式开启
+//在debug时使用uart1通信，否则使用uart3
 int DEBUG = 1;
+
+//温度传感器模块结构体
 onewire tempSensor = {GPIOC,GPIO_PIN_12};
 /* USER CODE END PV */
 
@@ -66,8 +70,8 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-extern uint8_t rx_buffer[200];   //接收数据的数据
-
+extern uint8_t rx_buffer[200];   //接收数据的数�?
+extern uint8_t rx_buffer_3[200];
 /* USER CODE END 0 */
 
 /**
@@ -107,15 +111,18 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 	
-	__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //开启空闲中断
-	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);  //开启DMA接收中断
+	__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //�?启空闲中�?
+	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);  //�?启DMA接收中断
+	
+	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);  //�?启空闲中�?
+	HAL_UART_Receive_DMA(&huart3,rx_buffer,200);  //�?启DMA接收中断
 	
 	/*
-	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);  //开启空闲中断
-	HAL_UART_Receive_DMA(&huart3,rx_buffer,200);  //开启DMA接收中断
+	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);  //�?启空闲中�?
+	HAL_UART_Receive_DMA(&huart3,rx_buffer,200);  //�?启DMA接收中断
 	*/
 	
-	//ensure all relays are shut
+	//关闭所有继电器
 	shut_all_relay();
 	//自定义系统初始化
 	InitSystem();
@@ -133,7 +140,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	
-	//在这里什么都不要写
+	//在这里什么都不做
   while (1)
   {
     /* USER CODE END WHILE */

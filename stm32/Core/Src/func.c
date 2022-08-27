@@ -27,9 +27,9 @@ void add_coffee(uint8_t ml){
 	}
 	HAL_GPIO_WritePin(coffee_relay_GPIO_Port, coffee_relay_Pin, GPIO_PIN_SET);
 	
-	if(DEBUG)
-		printf("add %d ml coffee\r\n", ml);
-	
+	if(DEBUG){
+		//printf("add %d ml coffee\r\n", ml);
+	}
 }
 
 void add_milk(uint8_t ml){
@@ -44,8 +44,9 @@ void add_milk(uint8_t ml){
 	}
 	HAL_GPIO_WritePin(milk_relay_GPIO_Port, milk_relay_Pin, GPIO_PIN_SET);
 	
-	if(DEBUG)
-		printf("add %d ml milk\r\n", ml);
+	if(DEBUG){
+		//printf("add %d ml milk\r\n", ml);
+	}
 }
 
 void add_sugar(uint8_t ml){
@@ -60,8 +61,9 @@ void add_sugar(uint8_t ml){
 	}
 	HAL_GPIO_WritePin(sugar_relay_GPIO_Port, sugar_relay_Pin, GPIO_PIN_SET);
 	
-	if(DEBUG)
-		printf("add %d ml sugar\r\n", ml);
+	if(DEBUG){
+		//printf("add %d ml sugar\r\n", ml);
+	}
 }
 
 void mix_on(void){

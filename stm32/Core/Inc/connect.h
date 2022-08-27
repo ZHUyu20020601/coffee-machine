@@ -21,7 +21,7 @@ void uart1_send_string(uint8_t *tdata);
 
 //开启中断
 void uart1_start_dma(void);
-
+void uart3_start_dma(void);
 
 
 /*业务函数*/

@@ -19,12 +19,12 @@
 /* 
 * 在这里写些提醒！
   1. osDelay(pdMS_TO_TICKS(ms));可以延时毫秒?
-	2. 注意osDelay是阻塞的，HAL_DELAY()是非阻塞的。
+	2. 注意osDelay是阻塞的，HAL_DELAY()是非阻塞的�??
 		 在使用osDelay时，其他的task任然可以执行
-	3. making进程和error进程都采用查询系统状态getsysemstatus()获取状态
-		 在connect.c中的start和emergent_stop调用setsystemstatus()修改状态
-		 由management进程（优先级仅次于中断）检测系统状态变化，然后挂起making或error进程
-	4. 所有线程在for的无限循环中必须由osDelay，否则将持续占用cpu
+	3. making进程和error进程都采用查询系统状态getsysemstatus()获取状�??
+		 在connect.c中的start和emergent_stop调用setsystemstatus()修改状�??
+		 由management进程（优先级仅次于中断）�?测系统状态变化，然后挂起making或error进程
+	4. �?有线程在for的无限循环中必须由osDelay，否则将持续占用cpu
 		 
 */
 	
@@ -80,7 +80,7 @@ osThreadId_t errorTaskHandle;
 const osThreadAttr_t errorTask_attributes = {
 	.name = "errorTask",
 	.stack_size = 128 * 6,
-	.priority = (osPriority_t) osPriorityAboveNormal,//第二高
+	.priority = (osPriority_t) osPriorityAboveNormal,//第二�?
 
 };
 
@@ -90,7 +90,7 @@ osThreadId_t managementHandle;
 const osThreadAttr_t managementTask_attributes = {
 	.name = "managementTark",
 	.stack_size = 128 * 8,
-	.priority = (osPriority_t) osPriorityHigh,//设置优先级最高
+	.priority = (osPriority_t) osPriorityHigh,//设置优先级最�?
 };
 
 
@@ -101,7 +101,7 @@ osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -195,21 +195,21 @@ void startMakingTask(void *argument){
 	cnt = 0;
 
 	for(;;){
-		/*在下方加入制作咖啡机的进程代码*/
+		/*在下方加入制作咖啡机的进程代�?*/
 		
 		/*
 		TODO:
-		将下面的代码（if中的内容）替换为实际的业务逻辑代码
-		1. 加咖啡
+		将下面的代码（if中的内容）替换为实际的业务�?�辑代码
+		1. 加咖�?
 			1.1. 容量
-		2. 加牛奶
+		2. 加牛�?
 		3. 加糖
 		4. 加热
 		5. 搅拌
 		6. 倒出
 		
 		ATTENTION:
-		1. Error进程会将此进程挂起
+		1. Error进程会将此进程挂�?
 		2. 此进程挂起后恢复，会直接回到上一次被挂起的点继续执行
 		
 		*/
@@ -227,13 +227,13 @@ void startMakingTask(void *argument){
 			//HAL_Delay(200);
 			cnt++;
 			if(cnt > 20){
-				SetStatusWaiting();//重新将状态切回等待
+				SetStatusWaiting();//重新将状态切回等�?
 				cnt = 0;
 			}
 		}
 		
 		
-		/*在上方加入制作咖啡机的进程代码*/
+		/*在上方加入制作咖啡机的进程代�?*/
 		else{
 			osDelay(200);
 		}
@@ -242,14 +242,14 @@ void startMakingTask(void *argument){
 }
 
 /**
-* @brief  紧急停止
+* @brief  紧�?�停�?
 * @param  argument: Not used
 * @retval None
   */
 void startErrorTask(void *argument){
 	for(;;){
 		
-		/*在下方加入咖啡机停机的代码*/
+		/*在下方加入咖啡机停机的代�?*/
 		if(GetSystemStatus() == Error){
 			
 			printf("emergent stop!\n");			
@@ -283,8 +283,8 @@ void managementTask(void *argument){
 		if( GetSystemStatus() == Waiting){
 				sysflag = 0;
 		}
-		osDelay(1);//单次执行循环速度快
-		//必须要有delay，否则会始终占用cpu，阻塞其他函数
+		osDelay(1);//单次执行循环速度�?
+		//必须要有delay，否则会始终占用cpu，阻塞其他函�?
 	}
 }
 
