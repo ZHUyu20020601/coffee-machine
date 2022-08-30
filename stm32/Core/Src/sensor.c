@@ -1,6 +1,8 @@
 
 #include "sensor.h"
 #include "cmsis_os.h"
+#include "stdio.h"
+#include "Kalman_Filter.h"
 
 
 extern TIM_HandleTypeDef htim3;
@@ -8,41 +10,51 @@ extern TIM_HandleTypeDef htim4;
 
 extern TIM_HandleTypeDef htim6;
 
-const static int average_span = 5;
+extern UART_HandleTypeDef huart2;
 
+const static int average_span = 30;
+//uint8_t md_rxbuf[MOD_RX_BUF_MAX];
+extern uint8_t rx_buffer_2[200];
+//uint16_t md_rxcnt = 0;
+extern uint8_t rx_len_2;
 
 float get_coffee_dist(void){
 	int i;
-	float dist = 0;
+	Kalman_Filter_reset();
 	for(i = 0 ; i < average_span ; ++i){
 		coffee_trig_send();
-		dist += distance(coffee_time_cap());
+		rtU.Input = (real_T)distance(coffee_time_cap());
+		Kalman_Filter_step();
 		HAL_Delay(20);//wait 20ms
 		//osDelay(20);
 	}
-	return dist / 5;
+	return rtY.Output;
 }
 
 float get_milk_dist(void){
 	int i;
-	float dist = 0;
+	//float dist = 0;
+	Kalman_Filter_reset();
 	for(i = 0 ; i < average_span ; ++i){
 		milk_trig_send();
-		dist += distance(milk_time_cap());
+		rtU.Input = (real_T)distance(milk_time_cap());
+		Kalman_Filter_step();
 		HAL_Delay(20);//wait 20ms
 	}
-	return dist / 5;
+	return rtY.Output;
 }
 
 float get_sugar_dist(void){
 	int i;
-	float dist = 0;
+	//float dist = 0;
+	Kalman_Filter_reset();
 	for(i = 0 ; i < average_span ; ++i){
 		sugar_trig_send();
-		dist += distance(sugar_time_cap());
+		rtU.Input = (real_T)distance(sugar_time_cap());
+		Kalman_Filter_step();
 		HAL_Delay(20);//wait 20ms
 	}
-	return dist / 5;
+	return rtY.Output;
 }
 	
 
@@ -125,6 +137,18 @@ float distance(uint32_t us){
 }
 
 
+/*----------temperature----------*/
+
+int16_t read_temp(void){
+	int16_t pobj = -1, pabm = -1;
+	uint8_t result = UartReadTemp(&pobj, &pabm);
+	if(result != 0){
+		return pobj;
+	}
+	printf("%d\n",result);
+	printf("ERROR\n");
+	return -1;
+}
 
 int ds18b20_readtemperature(onewire *ptr){
 	unsigned char lo, hi;
@@ -142,6 +166,96 @@ int ds18b20_readtemperature(onewire *ptr){
 	x = (int)(x * 0.0625 * 100 + 0.5);
 	return x;
 }
+
+
+/* External functions --------------------------------------------------------*/
+
+
+/**
+ *  发送命令
+ *  @param cmd  命令
+ *  @param data 参数内容
+ *  @param len  参数长度
+ */
+void UartSendCmd(uint8_t cmd, uint8_t *parg, uint8_t len) {
+  uint8_t chk = 0, i, buf[16];
+
+  // 包头
+  buf[0] = 0xAA;
+  buf[1] = 0xA5;
+
+  // 包长
+  buf[2] = len + 3;
+
+  // 包命令
+  buf[3] = cmd;
+
+  // 包内容
+  for (i = 0; i < len; i++) {
+    chk += parg[i];
+    buf[4 + i] = parg[i];
+  }
+  // 校验和
+  chk = chk + cmd + len + 3;
+  buf[4 + len] = chk;
+  // 包尾
+  buf[5 + len] = 0x55;
+  HAL_UART_Transmit(&huart2, buf, 6 + len, 1000);
+  //HAL_UART_Transmit_DMA(&huart2, buf, 6+len);
+}
+
+
+/**
+ * @brief 读传感器温度
+ *
+ * @param pobj 返回目标温度
+ * @param pamb 返回环境温度
+ * @return uint8_t 返回测温结果，1为物温，2为体温，0为无应答
+ */
+uint8_t UartReadTemp(int16_t *pobj, int16_t *pamb) {
+  uint8_t type = 0;
+
+  rx_len_2 = 0;
+
+  UartSendCmd(0x01, NULL, 0);
+
+  // 延时等待接收完成
+  osDelay(pdMS_TO_TICKS(300));
+	//printf("%d\n", rx_len_2);
+	
+  if (rx_len_2 == 11 && rx_buffer_2[3] == 0x01){
+    type = rx_buffer_2[4];
+    *pobj = (rx_buffer_2[5] << 8) | (rx_buffer_2[6]);
+    *pamb = (rx_buffer_2[7] << 8) | (rx_buffer_2[8]);
+  }
+
+  return type;
+}
+
+/**
+ * @brief 设置测量模式
+ *
+ * @param mode 1为物温，2为体温
+ */
+void UartSetTempMode(uint8_t mode) {
+  uint8_t arg = mode;
+  UartSendCmd(0x02, &arg, 1);
+}
+
+
+/**
+ * @brief 设定模块通信方式
+ *
+ */
+void UartSetCommType(uint8_t type) {
+  uint8_t arg = type;
+  UartSendCmd(0x05, &arg, 1);
+}
+
+
+
+
+
 
 
 

@@ -18,9 +18,12 @@ ZHUYU
 void uart1_send_data(uint8_t *tdata,uint16_t tnum);
 void uart1_send_string(uint8_t *tdata);
 
+void uart3_send_string(uint8_t *tdata);
+
 
 //开启中断
 void uart1_start_dma(void);
+void uart2_start_dma(void);
 void uart3_start_dma(void);
 
 

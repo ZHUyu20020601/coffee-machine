@@ -25,6 +25,7 @@
 #include "connect.h"
 #include "sys.h"
 #include "stdio.h"
+#include "sensor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,6 +45,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
+extern int DEBUG;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -60,22 +62,25 @@
 extern TIM_HandleTypeDef htim4;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
+extern DMA_HandleTypeDef hdma_usart2_rx;
+extern DMA_HandleTypeDef hdma_usart2_tx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 extern DMA_HandleTypeDef hdma_usart3_tx;
 extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 extern TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN EV */
 
-extern uint8_t rx_buffer[200];   //接收数据的数�?
-extern volatile uint8_t rx_len; //接收数据的长�?
-extern volatile uint8_t recv_end_flag; //接收结束标志�?
-//extern uint8_t rx_log[30];
+extern uint8_t rx_buffer[200];   
+extern volatile uint8_t rx_len; 
 
-extern uint8_t rx_buffer_3[200];   //接收数据的数�?
-extern volatile uint8_t rx_len_3; //接收数据的长�?
-extern volatile uint8_t recv_end_flag_3; //接收结束标志�?
+extern uint8_t rx_buffer_2[200];  
+extern volatile uint8_t rx_len_2; 
+
+extern uint8_t rx_buffer_3[200];   
+extern volatile uint8_t rx_len_3;
 
 /* USER CODE END EV */
 
@@ -234,6 +239,34 @@ void DMA1_Channel5_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles DMA1 channel6 global interrupt.
+  */
+void DMA1_Channel6_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel6_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel6_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart2_rx);
+  /* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel6_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 channel7 global interrupt.
+  */
+void DMA1_Channel7_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel7_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel7_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart2_tx);
+  /* USER CODE BEGIN DMA1_Channel7_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel7_IRQn 1 */
+}
+
+/**
   * @brief This function handles TIM1 update interrupt.
   */
 void TIM1_UP_IRQHandler(void)
@@ -271,31 +304,63 @@ void USART1_IRQHandler(void)
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
-	uint8_t tmp_flag =__HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE); //获取IDLE状�??
-	if((tmp_flag != RESET))//判断接收是否结束
-		{ 
-      // recv_end_flag = 1; //接收结束
-      __HAL_UART_CLEAR_IDLEFLAG(&huart1);//清除标志�?
-			
-      HAL_UART_DMAStop(&huart1); 
-			
-      uint8_t temp=__HAL_DMA_GET_COUNTER(&hdma_usart1_rx);    
-			
-      rx_len =200-temp; //计算数据长度
-			
-      //HAL_UART_Transmit_DMA(&huart1, rx_buffer,rx_len);//发�?�数�?
-			
-			//HAL_UART_Transmit_DMA(&huart1, "recieved msg\n", 14);
-			
-			parse_msg(rx_buffer);//处理接受到的数据
-			
-			//HAL_UART_Transmit_DMA(&huart1, rx_log, 14);
-			
-			uart1_start_dma();
-     //HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//�?启DMA
+	
+	uint8_t tmp_flag =__HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE); //get idle status
+	if((tmp_flag != RESET))//determine whether transmission is finished
+	{ 
+		__HAL_UART_CLEAR_IDLEFLAG(&huart1);//clear status flag
+		HAL_UART_DMAStop(&huart1);
+		uint8_t temp=__HAL_DMA_GET_COUNTER(&hdma_usart1_rx);    
+		rx_len =200-temp; //calcult data length
+		
+		/*
+		in debug mode this function will analyse msg
+		else will switch led and send what has received back to uar1
+		*/
+		if(!DEBUG){
+			//switch led
+			if(HAL_GPIO_ReadPin(led_GPIO_Port, led_Pin) == GPIO_PIN_RESET){
+		      HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
+			}
+		    else{
+			  HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
+		    }
+			//send back
+			HAL_UART_Transmit_DMA(&huart1,rx_buffer, strlen((char*)rx_buffer));
 		}
+		else{
+			parse_msg(rx_buffer);
+		}
+		
+		uart1_start_dma();
+	 }
 
   /* USER CODE END USART1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART2 global interrupt.
+  */
+void USART2_IRQHandler(void)
+{
+	
+
+ HAL_UART_IRQHandler(&huart2);
+  /* USER CODE BEGIN USART3_IRQn 1 */
+
+	uint8_t tmp_flag =__HAL_UART_GET_FLAG(&huart2,UART_FLAG_IDLE); //get idle status
+	if((tmp_flag != RESET))//determine whether transmission is finished
+	{ 
+		__HAL_UART_CLEAR_IDLEFLAG(&huart2);//clear idle flag
+			
+		HAL_UART_DMAStop(&huart2); 
+			
+		uint8_t temp=__HAL_DMA_GET_COUNTER(&hdma_usart2_rx);    
+		rx_len_2 =200-temp; //calcult data length
+			
+		uart2_start_dma();
+
+	}
 }
 
 /**
@@ -308,39 +373,27 @@ void USART3_IRQHandler(void)
   /* USER CODE END USART3_IRQn 0 */
   HAL_UART_IRQHandler(&huart3);
   /* USER CODE BEGIN USART3_IRQn 1 */
-/* USER CODE BEGIN USART1_IRQn 0 */
 
-  /* USER CODE END USART1_IRQn 0 */
-  HAL_UART_IRQHandler(&huart3);
-  /* USER CODE BEGIN USART1_IRQn 1 */
-	uint8_t tmp_flag =__HAL_UART_GET_FLAG(&huart3,UART_FLAG_IDLE); //获取IDLE状濿
-	if((tmp_flag != RESET))//判断接收是否结束
-		{ 
-      // recv_end_flag = 1; //接收结束
-      __HAL_UART_CLEAR_IDLEFLAG(&huart3);//清除标志使
+	uint8_t tmp_flag =__HAL_UART_GET_FLAG(&huart3,UART_FLAG_IDLE);
+	if((tmp_flag != RESET))
+	{ 
+		__HAL_UART_CLEAR_IDLEFLAG(&huart3);
 			
-      HAL_UART_DMAStop(&huart3); 
+		HAL_UART_DMAStop(&huart3); 
 			
-      uint8_t temp=__HAL_DMA_GET_COUNTER(&hdma_usart3_rx);    
+		uint8_t temp=__HAL_DMA_GET_COUNTER(&hdma_usart3_rx);    
 			
-      rx_len =200-temp; //计算数据长度
+		rx_len_3 =200-temp; 
 			
-      //HAL_UART_Transmit_DMA(&huart1, rx_buffer,rx_len);//发鿁数捿
+		//analyse received msg
+		parse_msg(rx_buffer_3);
 			
-			//HAL_UART_Transmit_DMA(&huart1, "recieved msg\n", 14);
-			
-			parse_msg(rx_buffer_3);//处理接受到的数据
-			
-			//HAL_UART_Transmit_DMA(&huart1, rx_log, 14);
-			
-			uart3_start_dma();
-     //HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//弿启DMA
-		}
+		uart3_start_dma();
 
-  /* USER CODE END USART1_IRQn 1 */
+	}
+
   /* USER CODE END USART3_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
-
 /* USER CODE END 1 */

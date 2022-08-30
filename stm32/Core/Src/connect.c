@@ -8,6 +8,8 @@
 
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
+extern DMA_HandleTypeDef hdma_usart3_tx;
+extern DMA_HandleTypeDef hdma_usart3_rx;
 extern osThreadId_t makingTaskHandle;
 
 extern int DEBUG;
@@ -19,6 +21,11 @@ uint8_t rx_buffer[200];   //接收数据的数组
 uint8_t rx_log[50];   //日志数组
 volatile uint8_t rx_len = 0; //接收数据的长度
 volatile uint8_t recv_end_flag = 0; //接收结束标志位
+
+uint8_t rx_buffer_2[200];   //接收数据的数组
+uint8_t rx_log_2[50];   //日志数组
+volatile uint8_t rx_len_2 = 0; //接收数据的长度
+volatile uint8_t recv_end_flag_2 = 0; //接收结束标志位
 
 //for usart3
 uint8_t rx_buffer_3[200];   //接收数据的数组
@@ -45,14 +52,27 @@ void uart1_send_data(uint8_t *tdata,uint16_t tnum){
   HAL_UART_Transmit_DMA(&huart1,tdata,tnum);
 }
 
+
+void uart3_send_string(uint8_t *tdata){
+  //等待发送状态OK
+  while(HAL_DMA_GetState(&hdma_usart3_tx) == HAL_DMA_STATE_BUSY) osDelay(1);
+  //发送数据
+  HAL_UART_Transmit_DMA(&huart3,tdata,strlen((char*)tdata));
+}
+
 //开启uart1 DMA收发
 void uart1_start_dma(void){
 	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//开启DMA
 }
 
-void uart3_start_dma(void){
-	HAL_UART_Receive_DMA(&huart3,rx_buffer,200);//开启DMA
+void uart2_start_dma(void){
+	HAL_UART_Receive_DMA(&huart2,rx_buffer_2,200);//开启DMA
 }
+
+void uart3_start_dma(void){
+	HAL_UART_Receive_DMA(&huart3,rx_buffer_3,200);//开启DMA
+}
+
 
 
 
@@ -66,7 +86,8 @@ ATTENTION:
 */
 
 void parse_msg(uint8_t* msg){
-		
+	
+	
 		
 	cJSON* obj = cJSON_Parse((char*)msg);//解析对象
 	
@@ -99,9 +120,19 @@ void parse_msg(uint8_t* msg){
 	if( strcmp(type, "emergent stop") == 0){
 		emergent_stop(id);
 	}
+	
+	//led指示接收到消息
+	if(HAL_GPIO_ReadPin(led_GPIO_Port, led_Pin) == GPIO_PIN_RESET){
+		HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
+	}
+	else{
+		HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
+	}
+
 
 	//销毁临时变量，节约内存
 	cJSON_Delete(obj);
+
 
 }
 
@@ -222,13 +253,17 @@ void response_ok(uint8_t id){
 	//发送
 	if(DEBUG){
 		//传递给log字符串
-		strcpy(rx_log, cJSON_Print(cjson));
+		strcpy((char*)rx_log, cJSON_Print(cjson));
 		HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
 	}
 	else{
 		//传递给log字符串
-		strcpy(rx_log_3, cJSON_Print(cjson));
-		HAL_UART_Transmit_DMA(&huart3, rx_log, strlen((char*)rx_log_3));
+		
+		strcpy((char*)rx_log_3, cJSON_Print(cjson));
+		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log_3));
+		//printf(rx_log_3);
+		
+	
 	}
 	
 	//销毁对象
@@ -251,22 +286,25 @@ void response_making(uint8_t id){
 	
 	if(DEBUG){
 		//传递给log字符串
-		strcpy(rx_log, cJSON_Print(cjson));
+		strcpy((char*)rx_log, cJSON_Print(cjson));
 	
 		//发送
 		HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
 	}
 	else{
 		//传递给log字符串
-		strcpy(rx_log_3, cJSON_Print(cjson));
+		
+		strcpy((char*)rx_log_3, cJSON_Print(cjson));
 	
 		//发送
-		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log));
+		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log_3));
+		//printf(rx_log_3);
+	
 	}
 	
 	
 	//销毁对象
-	cJSON_Delete(cjson);
+	cJSON_Delete(cjson);                      
 }
 
 
@@ -283,12 +321,15 @@ void response_error(uint8_t id, char* msg){
 	cJSON_AddItemToObject(cjson, "result", response);
 	
 	if(DEBUG){
-		strcpy(rx_log, cJSON_Print(cjson));
+		strcpy((char*)rx_log, cJSON_Print(cjson));
 		HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
 	}
 	else{
-		strcpy(rx_log_3, cJSON_Print(cjson));
-		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log));
+		
+		strcpy((char*)rx_log_3, cJSON_Print(cjson));
+		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log_3));
+		//printf(rx_log_3);
+		
 	}
 	
 	
@@ -312,12 +353,15 @@ void response_request(uint8_t id, char* variable, uint8_t value){
 	
 	
 	if(DEBUG){
-		strcpy(rx_log, cJSON_Print(cjson));
+		strcpy((char*)rx_log, cJSON_Print(cjson));
 		HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
 	}
 	else{
-		strcpy(rx_log_3, cJSON_Print(cjson));
-		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log));
+		
+		strcpy((char*)rx_log_3, cJSON_Print(cjson));
+		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log_3));
+		//printf(rx_log_3);
+		
 	}
 		
 	//销毁对象
@@ -340,12 +384,15 @@ void response_status(uint8_t id){
 
 	
 	if(DEBUG){
-		strcpy(rx_log, cJSON_Print(cjson));
+		strcpy((char*)rx_log, cJSON_Print(cjson));
 		HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
 	}
 	else{
-		strcpy(rx_log_3, cJSON_Print(cjson));
-		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log));
+		
+		strcpy((char*)rx_log_3, cJSON_Print(cjson));
+		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log_3));
+		//printf(rx_log_3);
+		
 	}
 	
 	//销毁对象

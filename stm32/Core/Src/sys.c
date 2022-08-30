@@ -17,7 +17,7 @@ void InitSystem(void){
 	for(i = 0; i < 5; i++)
 		InitCfg(&(buf.buffer[i]));
 	buf.rear = 0;
-	if(DEBUG)
+	if(!DEBUG)
 		HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
 	else
 		HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
