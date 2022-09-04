@@ -57,8 +57,10 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, milk_trigger_Pin|sugar_trigger_Pin|led_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, coffee_relay_Pin|milk_relay_Pin|sugar_relay_Pin|mixer_relay_Pin
-                          |heater_relay_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, coffee_relay_Pin|milk_relay_Pin|mixer_relay_Pin|heater_relay_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(sugar_relay_GPIO_Port, sugar_relay_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PCPin PCPin */
   GPIO_InitStruct.Pin = coffee_trigger_Pin|pour_relay_Pin;
@@ -86,14 +88,19 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PBPin PBPin PBPin PBPin
-                           PBPin */
-  GPIO_InitStruct.Pin = coffee_relay_Pin|milk_relay_Pin|sugar_relay_Pin|mixer_relay_Pin
-                          |heater_relay_Pin;
+  /*Configure GPIO pins : PBPin PBPin PBPin PBPin */
+  GPIO_InitStruct.Pin = coffee_relay_Pin|milk_relay_Pin|mixer_relay_Pin|heater_relay_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = sugar_relay_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(sugar_relay_GPIO_Port, &GPIO_InitStruct);
 
 }
 

@@ -13,13 +13,6 @@ ZHUYU
 
 
 /*串口通信*/
-//发送数据
-//不要再中断函数中使用！！
-void uart1_send_data(uint8_t *tdata,uint16_t tnum);
-void uart1_send_string(uint8_t *tdata);
-
-void uart3_send_string(uint8_t *tdata);
-
 
 //开启中断
 void uart1_start_dma(void);

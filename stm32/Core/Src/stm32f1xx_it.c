@@ -338,14 +338,17 @@ void USART1_IRQHandler(void)
   /* USER CODE END USART1_IRQn 1 */
 }
 
+
+
 /**
-  * @brief This function handles USART2 global interrupt.
+  * @brief This function handles USART3 global interrupt.
   */
 void USART2_IRQHandler(void)
 {
-	
+  /* USER CODE BEGIN USART3_IRQn 0 */
 
- HAL_UART_IRQHandler(&huart2);
+  /* USER CODE END USART3_IRQn 0 */
+  HAL_UART_IRQHandler(&huart3);
   /* USER CODE BEGIN USART3_IRQn 1 */
 
 	uint8_t tmp_flag =__HAL_UART_GET_FLAG(&huart2,UART_FLAG_IDLE); //get idle status

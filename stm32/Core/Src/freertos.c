@@ -19,12 +19,12 @@
 /* 
 * 在这里写些提醒！
   1. osDelay(pdMS_TO_TICKS(ms));可以延时毫秒?
-	2. 注意osDelay是阻塞的，HAL_DELAY()是非阻塞的
+	2. 注意osDelay是阻塞的，HAL_DELAY()是非阻塞�?
 		 在使用osDelay时，其他的task任然可以执行
-	3. making进程和error进程都采用查询系统状态getsysemstatus()获取状态
-		 在connect.c中的start和emergent_stop调用setsystemstatus()修改状态
-		 由management进程（优先级仅次于中断）检测系统状态变化，然后挂起making或error进程
-	4. 所有线程在for的无限循环中必须由osDelay，否则将持续占用cpu
+	3. making进程和error进程都采用查询系统状态getsysemstatus()获取状�??
+		 在connect.c中的start和emergent_stop调用setsystemstatus()修改状�??
+		 由management进程（优先级仅次于中断）�?测系统状态变化，然后挂起making或error进程
+	4. �?有线程在for的无限循环中必须由osDelay，否则将持续占用cpu
 	5. 在线程里面HAL_UART_Transmit_DMA对uart3似乎无效
 		 
 */
@@ -45,6 +45,7 @@
 #include "sensor.h"
 #include "string.h"
 #include "connect.h"
+#include "func.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -66,7 +67,11 @@ extern onewire tempSensor;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
+extern uint8_t send_buf[200];
 
+extern int DEBUG;
+
+extern SystemCfg environmentCfg;
 
 /* USER CODE END PM */
 
@@ -100,6 +105,13 @@ const osThreadAttr_t managementTask_attributes = {
 	.priority = (osPriority_t) osPriorityHigh,//highest priority
 };
 
+osThreadId_t sendHandle;
+
+const osThreadAttr_t sendTask_attributes = {
+	.name = "sendTark",
+	.stack_size = 128 * 8,
+	.priority = (osPriority_t) osPriorityNormal,//highest priority
+};
 
 
 /* USER CODE END Variables */
@@ -116,6 +128,7 @@ const osThreadAttr_t defaultTask_attributes = {
 void startMakingTask(void *argument);
 void startErrorTask(void *argument);
 void managementTask(void *argument);
+void sendTask(void* argument);
 
 /* USER CODE END FunctionPrototypes */
 
@@ -158,6 +171,7 @@ void MX_FREERTOS_Init(void) {
 	makingTaskHandle = osThreadNew(startMakingTask, "making", &makingTask_attributes);
 	errorTaskHandle = osThreadNew(startErrorTask, "error", &errorTask_attributes);
 	managementHandle = osThreadNew(managementTask, "manage", &managementTask_attributes);
+	sendHandle = osThreadNew(sendTask, "sender", &sendTask_attributes);
 
   /* USER CODE END RTOS_THREADS */
 
@@ -180,9 +194,11 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  //HAL_UART_Transmit_DMA(&huart2, msg, strlen((char*)msg));
-	  //osDelay(pdMS_TO_TICKS(1000));
-	  osDelay(1);
+	  environmentCfg.coffee = get_coffee_dist();
+	  environmentCfg.milk = get_milk_dist();
+	  environmentCfg.sugar = get_sugar_dist();
+	  environmentCfg.temp = 0.1 * read_temp();
+	  osDelay(pdMS_TO_TICKS(200));
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -195,13 +211,10 @@ void StartDefaultTask(void *argument)
 * @retval None
   */
 
-uint8_t cnt = 0;
+uint8_t started = 0;
 
 void startMakingTask(void *argument){
 	
-	
-	cnt = 0;
-
 	for(;;){
 		/*COFFEE MAKING PROCESS ADDING AT BELOW*/
 		
@@ -221,20 +234,29 @@ void startMakingTask(void *argument){
 		
 		if( GetSystemStatus() == Making){
 			
-			printf("making %d%%\n", cnt*5);
-			
-			printf("coffee dist = %.2f cm\n",get_coffee_dist());
-			printf("milk dist = %.2f cm\n",get_milk_dist());
-			printf("sugar dist = %.2f cm\n", get_sugar_dist());
-			printf("temp = %.1f\n", 0.1 * read_temp());
-			
-			osDelay(pdMS_TO_TICKS(1000));
-			//HAL_Delay(200);
-			cnt++;
-			if(cnt > 20){
-				SetStatusWaiting();//switch status back to Waiting
-				cnt = 0;
+			if(!started){
+				heat_on();
+				mix_on();
+				started = 1;
 			}
+			
+			add_sugar(200);
+			
+			//printf("coffee dist = %.2f cm\n",get_coffee_dist());
+			//printf("milk dist = %.2f cm\n",get_milk_dist());
+			//printf("%.2f\n", get_sugar_dist());
+			//float temp = 0.1 * read_temp();
+			//printf("temp = %.1f\n", temp);
+			
+			if(temp >= 50){
+				heat_off();
+				mix_off();
+				started = 0;
+			}
+			
+			SetStatusWaiting();
+			osDelay(pdMS_TO_TICKS(500));			
+			
 		}
 		
 		
@@ -258,7 +280,7 @@ void startErrorTask(void *argument){
 		if(GetSystemStatus() == Error){
 			
 			printf("emergent stop!\n");	
-			osDelay(pdMS_TO_TICKS(100));			
+			osDelay(pdMS_TO_TICKS(1000));			
 		/*EMERGENT STOP PROCESS ADDING ABOVE*/
 		}else{
 			osDelay(200);
@@ -269,27 +291,24 @@ void startErrorTask(void *argument){
 
 
 
-uint8_t sysflag = 0;//prevent replicate execute
-
-//ATTENTION:
-//CANNOT GO DIRECTLY TO ERROR MODE VIA WAITING MODE, ONLY VIA MAKING
+//FUNCTION:
+//make sure that making and error task won't execute at the same time
 void managementTask(void *argument){
 	for(;;){
 		//suspend Error, Resume making
-		if(osThreadGetState(errorTaskHandle) != osThreadBlocked && GetSystemStatus() == Making && sysflag == 0){ 
-				
-				osThreadSuspend(errorTaskHandle);
-				osThreadResume(makingTaskHandle);
-				sysflag = 1;
+		if(osThreadGetState(errorTaskHandle) != osThreadBlocked && GetSystemStatus() == Making ){ 
+			osThreadSuspend(defaultTaskHandle);
+			osThreadSuspend(errorTaskHandle);
+			osThreadResume(makingTaskHandle);
+			//sysflag = 1;
 		}
-		if(osThreadGetState(makingTaskHandle) != osThreadBlocked && GetSystemStatus() == Error && sysflag == 1){
-				osThreadSuspend(makingTaskHandle);
-				osThreadResume(errorTaskHandle);
-				sysflag = 0;
+		if(osThreadGetState(makingTaskHandle) != osThreadBlocked && GetSystemStatus() == Error ){
+			osThreadSuspend(makingTaskHandle);
+			osThreadResume(errorTaskHandle);
+			osThreadResume(defaultTaskHandle);
+			//sysflag = 0;
 		}
-		if( GetSystemStatus() == Waiting){
-				sysflag = 0;
-		}
+
 		// with delay for only 1 tick, this management thread will execute very frequently
 		// to switch the two threads immediately
 		osDelay(1);
@@ -297,6 +316,32 @@ void managementTask(void *argument){
 	}
 }
 
+void sendTask(void* argument){
+	for(;;){
+		//detect msg exist
+		if(strlen((char*)send_buf) > 0){
+			
+			if(DEBUG)
+				HAL_UART_Transmit(&huart1, send_buf, strlen((char*)send_buf), portMAX_DELAY);
+			else
+				HAL_UART_Transmit(&huart3, send_buf, strlen((char*)send_buf), portMAX_DELAY);
+			
+			//clear send-buf
+			memset(send_buf, 0, 200);
+			
+			//switch led
+			if(HAL_GPIO_ReadPin(led_GPIO_Port, led_Pin) == GPIO_PIN_RESET){
+				HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
+			}
+			else{
+				HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
+			}
+			
+		}
+
+		osDelay(20);
+	}
+}
 
 
 

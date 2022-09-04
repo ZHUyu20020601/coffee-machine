@@ -82,6 +82,7 @@ char* SetCurrentCfg(void);
 uint8_t GetCurrentCfg(cfg_property);
 uint8_t GetNextCfg(cfg_property);
 uint8_t GetTempCfg(cfg_property);
+uint8_t GetEnviCfg(cfg_property);
 
 /*工具函数*/
 //void HAL_Delay_us(uint32_t us);

@@ -56,6 +56,7 @@
 //when 'DEBUG = 1' debug mode is on
 //in debug mode, transmission(printf) is via uart1, else via uart3
 int DEBUG = 1;
+uint8_t send_buf[200];
 
 //温度传感器模块结构体
 onewire tempSensor = {GPIOC,GPIO_PIN_12};
@@ -130,7 +131,7 @@ int main(void)
 	InitSystem();
 	//uart-temperature init
 	UartSetCommType(1);//use uart
-	UartSetTempMode(1);//use object temp
+	UartSetTempMode(2);//use object temp
 	
 	
   /* USER CODE END 2 */

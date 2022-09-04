@@ -5,12 +5,14 @@
 #include "FreeRtos.h"
 #include "cmsis_os.h"
 #include "task.h"
+#include <stdlib.h>
 
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart3_tx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
-extern osThreadId_t makingTaskHandle;
+
+extern uint8_t send_buf[200];
 
 extern int DEBUG;
 
@@ -35,30 +37,6 @@ volatile uint8_t recv_end_flag_3 = 0; //接收结束标志位
 
 
 
-
-//不要再中断函数中使用！！
-void uart1_send_string(uint8_t *tdata){
-	//等待发送状态OK
-  while(HAL_DMA_GetState(&hdma_usart1_tx) == HAL_DMA_STATE_BUSY) HAL_Delay(1);
-  //发送数据
-  HAL_UART_Transmit_DMA(&huart1,tdata,strlen((char*)tdata));
-}
-
-//不要再中断函数中使用！！
-void uart1_send_data(uint8_t *tdata,uint16_t tnum){
-	//等待发送状态OK
-  while(HAL_DMA_GetState(&hdma_usart1_tx) == HAL_DMA_STATE_BUSY) HAL_Delay(1);
-  //发送数据
-  HAL_UART_Transmit_DMA(&huart1,tdata,tnum);
-}
-
-
-void uart3_send_string(uint8_t *tdata){
-  //等待发送状态OK
-  while(HAL_DMA_GetState(&hdma_usart3_tx) == HAL_DMA_STATE_BUSY) osDelay(1);
-  //发送数据
-  HAL_UART_Transmit_DMA(&huart3,tdata,strlen((char*)tdata));
-}
 
 //开启uart1 DMA收发
 void uart1_start_dma(void){
@@ -121,15 +99,6 @@ void parse_msg(uint8_t* msg){
 		emergent_stop(id);
 	}
 	
-	//led指示接收到消息
-	if(HAL_GPIO_ReadPin(led_GPIO_Port, led_Pin) == GPIO_PIN_RESET){
-		HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
-	}
-	else{
-		HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
-	}
-
-
 	//销毁临时变量，节约内存
 	cJSON_Delete(obj);
 
@@ -150,8 +119,9 @@ void set_cfg(char* variable, uint8_t value, uint8_t id){
 		SetNextCfg(sugar, value);
 	if(strcmp(variable,"temp") == 0)
 		SetNextCfg(temp, value);
-	if(strcmp(variable, "addbuf") == 0)
-			msg = AddBuffer();
+	
+	//if(strcmp(variable, "addbuf") == 0)
+	//		msg = AddBuffer();
 		
 		
 	if(msg == NULL)
@@ -164,35 +134,15 @@ void set_cfg(char* variable, uint8_t value, uint8_t id){
 
 void req_cfg(char* variable, uint8_t id){
 	uint8_t value;
-	
-	
-//每次都读取的是currentCfg，不能获得buf中的内容
-//如果从未addbuf和start，即没有进行过setcurrentcfg，那么currentcfg将是刚刚初始化的状态
-	/*
+		
 	if(strcmp(variable, "coffee") == 0)
-		value = GetCurrentCfg(coffee);
+		value = GetEnviCfg(coffee);
 	if(strcmp(variable,"milk") == 0)
-		value = GetCurrentCfg(milk);
+		value = GetEnviCfg(milk);
 	if(strcmp(variable,"sugar") == 0)
-		value = GetCurrentCfg(sugar);
+		value = GetEnviCfg(sugar);
 	if(strcmp(variable,"temp") == 0)
-		value = GetCurrentCfg(temp);
-	*/
-	
-//每次都只读取tempCfg中的参数，对于已经存入队列的参数以及currentcfg则无法读取	
-	if(strcmp(variable, "coffee") == 0)
-		value = GetTempCfg(coffee);
-	if(strcmp(variable,"milk") == 0)
-		value = GetTempCfg(milk);
-	if(strcmp(variable,"sugar") == 0)
-		value = GetTempCfg(sugar);
-	if(strcmp(variable,"temp") == 0)
-		value = GetTempCfg(temp);
-	
-	
-	
-	//sprintf(rx_log, "value of %s is %d\n", variable, value);
-	//HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
+		value = GetEnviCfg(temp);
 	
 	response_request(id, variable, value);
 	
@@ -200,7 +150,6 @@ void req_cfg(char* variable, uint8_t id){
 
 
 void start(uint8_t id){
-	//response_ok(id);
 	
 	//为防止连续两次执行start，放在if中
 	if(GetSystemStatus() != Making){
@@ -211,14 +160,11 @@ void start(uint8_t id){
 			response_error(id, msg);
 			return;
 		}
-	}
-	
-	
-	if(GetSystemStatus() != Making)
+		
 		SetStatusMaking();
-
-	
-	response_status(id);
+		
+		response_status(id);
+	}
 	
 	
 }
@@ -238,7 +184,7 @@ void emergent_stop(uint8_t id){
 
 /*----返回----*/
 void response_ok(uint8_t id){
-	//生成目标对象
+
 	cJSON* cjson = cJSON_CreateObject();
 	cJSON_AddStringToObject(cjson, "type", "response");
 	cJSON_AddNumberToObject(cjson, "id", id);
@@ -250,30 +196,17 @@ void response_ok(uint8_t id){
 	cJSON_AddItemToObject(cjson, "result", response);
 	
 	
-	//发送
-	if(DEBUG){
-		//传递给log字符串
-		strcpy((char*)rx_log, cJSON_Print(cjson));
-		HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
-	}
-	else{
-		//传递给log字符串
-		
-		strcpy((char*)rx_log_3, cJSON_Print(cjson));
-		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log_3));
-		//printf(rx_log_3);
-		
+	char* temp = cJSON_Print(cjson);
+	strcpy((char*)send_buf, temp);
 	
-	}
-	
-	//销毁对象
+	free(temp);
 	cJSON_Delete(cjson);
 	
 }
 	
 	
 void response_making(uint8_t id){
-		//生成目标对象
+
 	cJSON* cjson = cJSON_CreateObject();
 	cJSON_AddStringToObject(cjson, "type", "response");
 	cJSON_AddNumberToObject(cjson, "id", id);
@@ -284,32 +217,16 @@ void response_making(uint8_t id){
 	
 	cJSON_AddItemToObject(cjson, "result", response);
 	
-	if(DEBUG){
-		//传递给log字符串
-		strcpy((char*)rx_log, cJSON_Print(cjson));
+	char* temp = cJSON_Print(cjson);
+	strcpy((char*)send_buf, temp);
 	
-		//发送
-		HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
-	}
-	else{
-		//传递给log字符串
-		
-		strcpy((char*)rx_log_3, cJSON_Print(cjson));
-	
-		//发送
-		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log_3));
-		//printf(rx_log_3);
-	
-	}
-	
-	
-	//销毁对象
+	free(temp);
 	cJSON_Delete(cjson);                      
 }
 
 
 void response_error(uint8_t id, char* msg){
-	//生成目标对象
+
 	cJSON* cjson = cJSON_CreateObject();
 	cJSON_AddStringToObject(cjson, "type", "response");
 	cJSON_AddNumberToObject(cjson, "id", id);
@@ -320,27 +237,17 @@ void response_error(uint8_t id, char* msg){
 	
 	cJSON_AddItemToObject(cjson, "result", response);
 	
-	if(DEBUG){
-		strcpy((char*)rx_log, cJSON_Print(cjson));
-		HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
-	}
-	else{
-		
-		strcpy((char*)rx_log_3, cJSON_Print(cjson));
-		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log_3));
-		//printf(rx_log_3);
-		
-	}
+	char* temp = cJSON_Print(cjson);
+	strcpy((char*)send_buf, temp);
 	
-	
-	//销毁对象
+	free(temp);
 	cJSON_Delete(cjson);
 	
 
 }
 
 void response_request(uint8_t id, char* variable, uint8_t value){
-	//生成目标对象
+
 	cJSON* cjson = cJSON_CreateObject();
 	cJSON_AddStringToObject(cjson, "type", "variable");
 	cJSON_AddNumberToObject(cjson, "id", id);
@@ -352,25 +259,17 @@ void response_request(uint8_t id, char* variable, uint8_t value){
 	cJSON_AddItemToObject(cjson, "result", response);
 	
 	
-	if(DEBUG){
-		strcpy((char*)rx_log, cJSON_Print(cjson));
-		HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
-	}
-	else{
-		
-		strcpy((char*)rx_log_3, cJSON_Print(cjson));
-		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log_3));
-		//printf(rx_log_3);
-		
-	}
-		
-	//销毁对象
+
+	char* temp = cJSON_Print(cjson);
+	strcpy((char*)send_buf, temp);
+	
+	
+	free(temp);
 	cJSON_Delete(cjson);
 
 }
 
 void response_status(uint8_t id){
-	//生成目标对象
 	cJSON* cjson = cJSON_CreateObject();
 	cJSON_AddStringToObject(cjson, "type", "status");
 	cJSON_AddNumberToObject(cjson, "id", id);
@@ -382,20 +281,11 @@ void response_status(uint8_t id){
 	else
 		cJSON_AddStringToObject(cjson, "status", "error");
 
+	char* temp = cJSON_Print(cjson);
+	strcpy((char*)send_buf, temp);
 	
-	if(DEBUG){
-		strcpy((char*)rx_log, cJSON_Print(cjson));
-		HAL_UART_Transmit_DMA(&huart1, rx_log, strlen((char*)rx_log));
-	}
-	else{
-		
-		strcpy((char*)rx_log_3, cJSON_Print(cjson));
-		HAL_UART_Transmit_DMA(&huart3, rx_log_3, strlen((char*)rx_log_3));
-		//printf(rx_log_3);
-		
-	}
 	
-	//销毁对象
+	free(temp);
 	cJSON_Delete(cjson);
 
 }

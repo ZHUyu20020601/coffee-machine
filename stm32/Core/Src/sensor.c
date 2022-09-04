@@ -12,7 +12,7 @@ extern TIM_HandleTypeDef htim6;
 
 extern UART_HandleTypeDef huart2;
 
-const static int average_span = 30;
+const static int average_span = 50;
 //uint8_t md_rxbuf[MOD_RX_BUF_MAX];
 extern uint8_t rx_buffer_2[200];
 //uint16_t md_rxcnt = 0;
@@ -145,8 +145,8 @@ int16_t read_temp(void){
 	if(result != 0){
 		return pobj;
 	}
-	printf("%d\n",result);
-	printf("ERROR\n");
+	//printf("%d\n",result);
+	//printf("TEMP ERROR\n");
 	return -1;
 }
 

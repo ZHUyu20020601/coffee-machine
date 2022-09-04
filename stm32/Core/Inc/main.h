@@ -79,14 +79,14 @@ void HAL_Delay_us(uint32_t us);
 #define coffee_relay_GPIO_Port GPIOB
 #define milk_relay_Pin GPIO_PIN_1
 #define milk_relay_GPIO_Port GPIOB
-#define sugar_relay_Pin GPIO_PIN_2
-#define sugar_relay_GPIO_Port GPIOB
 #define esp_transmit_Pin GPIO_PIN_10
 #define esp_transmit_GPIO_Port GPIOB
 #define esp_receive_Pin GPIO_PIN_11
 #define esp_receive_GPIO_Port GPIOB
 #define led_Pin GPIO_PIN_8
 #define led_GPIO_Port GPIOA
+#define sugar_relay_Pin GPIO_PIN_2
+#define sugar_relay_GPIO_Port GPIOD
 #define mixer_relay_Pin GPIO_PIN_3
 #define mixer_relay_GPIO_Port GPIOB
 #define heater_relay_Pin GPIO_PIN_4
