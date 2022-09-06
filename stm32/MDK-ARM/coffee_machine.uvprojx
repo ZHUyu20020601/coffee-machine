@@ -772,6 +772,11 @@
                 </FileArmAds>
               </FileOption>
             </File>
+            <File>
+              <FileName>includes.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\includes.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

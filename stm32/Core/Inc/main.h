@@ -57,6 +57,8 @@ void HAL_Delay_us(uint32_t us);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define heater_relay_Pin GPIO_PIN_14
+#define heater_relay_GPIO_Port GPIOC
 #define coffee_trigger_Pin GPIO_PIN_0
 #define coffee_trigger_GPIO_Port GPIOC
 #define coffee_echo_Pin GPIO_PIN_1
@@ -89,8 +91,6 @@ void HAL_Delay_us(uint32_t us);
 #define sugar_relay_GPIO_Port GPIOD
 #define mixer_relay_Pin GPIO_PIN_3
 #define mixer_relay_GPIO_Port GPIOB
-#define heater_relay_Pin GPIO_PIN_4
-#define heater_relay_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

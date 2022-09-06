@@ -1,8 +1,4 @@
-
-#include "sensor.h"
-#include "cmsis_os.h"
-#include "stdio.h"
-#include "Kalman_Filter.h"
+#include "includes.h"
 
 
 extern TIM_HandleTypeDef htim3;
@@ -17,6 +13,8 @@ const static int average_span = 50;
 extern uint8_t rx_buffer_2[200];
 //uint16_t md_rxcnt = 0;
 extern uint8_t rx_len_2;
+
+extern onewire tempSensor;
 
 float get_coffee_dist(void){
 	int i;
@@ -139,15 +137,27 @@ float distance(uint32_t us){
 
 /*----------temperature----------*/
 
-int16_t read_temp(void){
+float read_temp(void){
+	//ds18b20
+	
+	float temp = ds18b20_readtemperature(&tempSensor) / 100.0;
+	while(temp > 100){
+		temp = ds18b20_readtemperature(&tempSensor) / 100.0;
+		osDelay(pdMS_TO_TICKS(10));
+	}
+	return temp;
+	
+	//红外
+	/*
 	int16_t pobj = -1, pabm = -1;
 	uint8_t result = UartReadTemp(&pobj, &pabm);
 	if(result != 0){
 		return pobj;
 	}
+	*/
 	//printf("%d\n",result);
 	//printf("TEMP ERROR\n");
-	return -1;
+	//return -1;
 }
 
 int ds18b20_readtemperature(onewire *ptr){

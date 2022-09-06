@@ -26,14 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "stdio.h"
-#include "string.h"
-#include "stdlib.h"
-#include "sensor.h"
-#include "func.h"
-#include "sys.h"
-#include "connect.h"
-#include "cJSON.h"
+#include "includes.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

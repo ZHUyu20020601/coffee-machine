@@ -1,11 +1,5 @@
-#include "connect.h"
-#include "string.h"
-#include "stdio.h"
-#include "sys.h"
-#include "FreeRtos.h"
-#include "cmsis_os.h"
-#include "task.h"
-#include <stdlib.h>
+#include "includes.h"
+
 
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
@@ -16,7 +10,6 @@ extern uint8_t send_buf[200];
 
 extern int DEBUG;
 
-//extern SystemCfg tempCfg;
 
 
 uint8_t rx_buffer[200];   //接收数据的数组
@@ -120,9 +113,6 @@ void set_cfg(char* variable, uint8_t value, uint8_t id){
 	if(strcmp(variable,"temp") == 0)
 		SetNextCfg(temp, value);
 	
-	//if(strcmp(variable, "addbuf") == 0)
-	//		msg = AddBuffer();
-		
 		
 	if(msg == NULL)
 		response_ok(id);

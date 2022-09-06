@@ -23,9 +23,8 @@ uint32_t sugar_time_cap(void);
 float distance(uint32_t us);
 
 //tempurature
-//int ds18b20_readtemperature(onewire *ptr);
-
-int16_t read_temp(void);
+float read_temp(void);
+int ds18b20_readtemperature(onewire *ptr);
 
 //void MoudleUartRecNew(uint8_t ch);
 void UartSendCmd(uint8_t cmd, uint8_t *parg, uint8_t len);

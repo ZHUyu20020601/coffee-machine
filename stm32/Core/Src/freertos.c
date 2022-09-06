@@ -16,18 +16,7 @@
   ******************************************************************************
   */
 	
-/* 
-* 在这里写些提醒！
-  1. osDelay(pdMS_TO_TICKS(ms));可以延时毫秒?
-	2. 注意osDelay是阻塞的，HAL_DELAY()是非阻塞�?
-		 在使用osDelay时，其他的task任然可以执行
-	3. making进程和error进程都采用查询系统状态getsysemstatus()获取状�??
-		 在connect.c中的start和emergent_stop调用setsystemstatus()修改状�??
-		 由management进程（优先级仅次于中断）�?测系统状态变化，然后挂起making或error进程
-	4. �?有线程在for的无限循环中必须由osDelay，否则将持续占用cpu
-	5. 在线程里面HAL_UART_Transmit_DMA对uart3似乎无效
-		 
-*/
+
 	
 /* USER CODE END Header */
 
@@ -39,44 +28,49 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "main.h"
-#include "sys.h"
-#include "stdio.h"
-#include "sensor.h"
-#include "string.h"
-#include "connect.h"
-#include "func.h"
+#include "includes.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
+/* 
+* 在这里写些提醒！
+  1. osDelay(pdMS_TO_TICKS(ms));可以延时毫秒?
+	2. 注意osDelay是阻塞的，HAL_DELAY()是非阻塞的
+		 在使用osDelay时，其他的task任然可以执行
+	3. making进程和error进程都采用查询系统状态getsysemstatus()获取状态
+		 在connect.c中的start和emergent_stop调用setsystemstatus()修改状态
+		 由management进程（优先级仅次于中断）检测系统状态变化，然后挂起making或error进程
+	4. 所有线程在for的无限循环中必须由osDelay，否则将持续占用cpu
+	5. 在线程里面 尽量 采用非阻塞式的发送方式，即使用HAL_UART_Transmit而非HAL_UART_Transmit_DMA
+		 
+*/
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-//在os中延时采用的单位是tick，从毫秒到ticks采用下面的宏定义，因为系统中已经定义过，可以直接使用
-//#define  pdMS_TO_TICKS( xTimeInMs )     ( ( TickType_t ) ( ( ( TickType_t ) ( xTimeInMs ) * ( TickType_t ) configTICK_RATE_HZ ) / ( TickType_t ) 1000 ) )
 
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+/* USER CODE BEGIN Variables */
+
 extern onewire tempSensor;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 extern uint8_t send_buf[200];
-
 extern int DEBUG;
-
 extern SystemCfg environmentCfg;
 
-/* USER CODE END PM */
 
-/* Private variables ---------------------------------------------------------*/
-/* USER CODE BEGIN Variables */
 //制作进程句柄
 osThreadId_t makingTaskHandle;
 
@@ -194,11 +188,11 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  environmentCfg.coffee = get_coffee_dist();
-	  environmentCfg.milk = get_milk_dist();
-	  environmentCfg.sugar = get_sugar_dist();
-	  environmentCfg.temp = 0.1 * read_temp();
-	  osDelay(pdMS_TO_TICKS(200));
+	  environmentCfg.coffee = get_coffee_dist() * 10;
+	  environmentCfg.milk = get_milk_dist() * 10;
+	  environmentCfg.sugar = get_sugar_dist() * 10;
+	  environmentCfg.temp = read_temp();
+	  osDelay(pdMS_TO_TICKS(1));
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -209,58 +203,90 @@ void StartDefaultTask(void *argument)
 * @brief  coffee making process
 * @param  argument: Not used
 * @retval None
-  */
 
-uint8_t started = 0;
+* TODO:
+	procedures:
+	1. add coffee
+		1.1. volumn
+	2. add milk
+	3. add sugar
+	4. heat
+	5. mix
+	6. pour out
+		
+*/
 
 void startMakingTask(void *argument){
 	
-	for(;;){
-		/*COFFEE MAKING PROCESS ADDING AT BELOW*/
-		
-		/*
-		TODO:
-		procedures:
-		1. add coffee
-			1.1. volumn
-		2. add milk
-		3. add sugar
-		4. heat
-		5. mix
-		6. pour out
-		
-		*/
-		
-		
+	for(;;){		
 		if( GetSystemStatus() == Making){
 			
-			if(!started){
-				heat_on();
-				mix_on();
-				started = 1;
+	/*COFFEE MAKING PROCESS ADDING AT BELOW*/
+			
+			//HAL_GPIO_WritePin(coffee_relay_GPIO_Port, coffee_relay_Pin, GPIO_PIN_SET);
+			
+			HAL_GPIO_WritePin(mixer_relay_GPIO_Port, mixer_relay_Pin, GPIO_PIN_RESET);
+			
+			/*
+			
+			//加咖啡
+			if(HAL_GPIO_ReadPin(led_GPIO_Port, led_Pin) == GPIO_PIN_RESET){
+		      HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
 			}
+		    else{
+			  HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
+		    }
+			add_coffee(GetCurrentCfg(coffee));
 			
-			add_sugar(200);
 			
-			//printf("coffee dist = %.2f cm\n",get_coffee_dist());
-			//printf("milk dist = %.2f cm\n",get_milk_dist());
-			//printf("%.2f\n", get_sugar_dist());
-			//float temp = 0.1 * read_temp();
-			//printf("temp = %.1f\n", temp);
-			
-			if(temp >= 50){
-				heat_off();
-				mix_off();
-				started = 0;
+			//加牛奶
+			if(HAL_GPIO_ReadPin(led_GPIO_Port, led_Pin) == GPIO_PIN_RESET){
+		      HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
 			}
+		    else{
+			  HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
+		    }
+			add_milk(GetCurrentCfg(milk));
 			
+			//加糖
+			if(HAL_GPIO_ReadPin(led_GPIO_Port, led_Pin) == GPIO_PIN_RESET){
+		      HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
+			}
+		    else{
+			  HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
+		    }
+			add_sugar(GetCurrentCfg(sugar));
+			
+			//加热
+			if(HAL_GPIO_ReadPin(led_GPIO_Port, led_Pin) == GPIO_PIN_RESET){
+		      HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
+			}
+		    else{
+			  HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
+		    }
+			mix_on();
+			heat_temp();
+			mix_off();
+			
+			//倒出
+			if(HAL_GPIO_ReadPin(led_GPIO_Port, led_Pin) == GPIO_PIN_RESET){
+		      HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
+			}
+		    else{
+			  HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
+		    }
+			pour_out();
+			
+			
+			*/
+	/*COFFEE MAKING PROCESS ADDING AT ABOVE*/
+	
+			shut_all_relay();
 			SetStatusWaiting();
+			
 			osDelay(pdMS_TO_TICKS(500));			
 			
 		}
-		
-		
-		/*COFFEE MAKING PROCESS ADDING AT ABOVE*/
 		else{
 			osDelay(200);
 		}
@@ -276,12 +302,16 @@ void startMakingTask(void *argument){
 void startErrorTask(void *argument){
 	for(;;){
 		
-		/*EMERGENT STOP PROCESS ADDING BELOW*/
 		if(GetSystemStatus() == Error){
 			
-			printf("emergent stop!\n");	
-			osDelay(pdMS_TO_TICKS(1000));			
+		/*EMERGENT STOP PROCESS ADDING BELOW*/
+			//HAL_GPIO_WritePin(coffee_relay_GPIO_Port, coffee_relay_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(mixer_relay_GPIO_Port, mixer_relay_Pin, GPIO_PIN_SET);
 		/*EMERGENT STOP PROCESS ADDING ABOVE*/
+			
+			shut_all_relay();
+			
+			osDelay(pdMS_TO_TICKS(1000));			
 		}else{
 			osDelay(200);
 		}
@@ -300,13 +330,11 @@ void managementTask(void *argument){
 			osThreadSuspend(defaultTaskHandle);
 			osThreadSuspend(errorTaskHandle);
 			osThreadResume(makingTaskHandle);
-			//sysflag = 1;
 		}
 		if(osThreadGetState(makingTaskHandle) != osThreadBlocked && GetSystemStatus() == Error ){
 			osThreadSuspend(makingTaskHandle);
 			osThreadResume(errorTaskHandle);
 			osThreadResume(defaultTaskHandle);
-			//sysflag = 0;
 		}
 
 		// with delay for only 1 tick, this management thread will execute very frequently
@@ -329,16 +357,7 @@ void sendTask(void* argument){
 			//clear send-buf
 			memset(send_buf, 0, 200);
 			
-			//switch led
-			if(HAL_GPIO_ReadPin(led_GPIO_Port, led_Pin) == GPIO_PIN_RESET){
-				HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
-			}
-			else{
-				HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
-			}
-			
 		}
-
 		osDelay(20);
 	}
 }

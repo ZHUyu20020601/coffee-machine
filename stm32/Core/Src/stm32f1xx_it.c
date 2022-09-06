@@ -22,10 +22,7 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "connect.h"
-#include "sys.h"
-#include "stdio.h"
-#include "sensor.h"
+#include "includes.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -314,31 +311,21 @@ void USART1_IRQHandler(void)
 		rx_len =200-temp; //calcult data length
 		
 		/*
-		in debug mode this function will analyse msg
-		else will switch led and send what has received back to uar1
+		in both modes this function will analyse msg
+		only in debug mode will the led blink
+		
 		*/
-		if(!DEBUG){
-			//switch led
-			if(HAL_GPIO_ReadPin(led_GPIO_Port, led_Pin) == GPIO_PIN_RESET){
-		      HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
-			}
-		    else{
-			  HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_RESET);
-		    }
+		if(DEBUG){
 			//send back
-			HAL_UART_Transmit_DMA(&huart1,rx_buffer, strlen((char*)rx_buffer));
+			switch_led();
 		}
-		else{
-			parse_msg(rx_buffer);
-		}
+		parse_msg(rx_buffer);
 		
 		uart1_start_dma();
 	 }
 
   /* USER CODE END USART1_IRQn 1 */
 }
-
-
 
 /**
   * @brief This function handles USART3 global interrupt.
@@ -387,7 +374,13 @@ void USART3_IRQHandler(void)
 		uint8_t temp=__HAL_DMA_GET_COUNTER(&hdma_usart3_rx);    
 			
 		rx_len_3 =200-temp; 
-			
+		
+		/*
+		if not in DEBUG, led will switch when uart3 receive something
+		*/
+		
+		if(!DEBUG)
+			switch_led();
 		//analyse received msg
 		parse_msg(rx_buffer_3);
 			
