@@ -2,13 +2,15 @@
 
 extern int DEBUG;
 
+//this linear equation can calculate from distance to the volume of liquid left
+//which is based on our research 
 float dist_to_vol(float dist){
 	return (dist - 15.080) / -0.013  ;
 }
-
 float vol_to_dist(float vol){
 	return vol * (-0.013 ) + 15.080;
 }
+
 
 void shut_all_relay(void){
 	HAL_GPIO_WritePin(coffee_relay_GPIO_Port, coffee_relay_Pin, GPIO_PIN_RESET);
@@ -26,9 +28,11 @@ void add_coffee(uint8_t ml){
 	float h_end = vol_to_dist(vol_now - ml / 1.12);
 	//open valve
 	HAL_GPIO_WritePin(coffee_relay_GPIO_Port, coffee_relay_Pin, GPIO_PIN_SET);
+	
 	while(h_now < h_end){
 		h_now = get_coffee_dist();
 	}
+	//close valve
 	HAL_GPIO_WritePin(coffee_relay_GPIO_Port, coffee_relay_Pin, GPIO_PIN_RESET);
 	
 	if(DEBUG){
@@ -62,9 +66,11 @@ void add_sugar(uint8_t ml){
 	float h_end = vol_to_dist(vol_now - ml / 1.12);
 	//open valve
 	HAL_GPIO_WritePin(sugar_relay_GPIO_Port, sugar_relay_Pin, GPIO_PIN_SET);
+	
 	while(h_now < h_end){
 		h_now = get_sugar_dist();
 	}
+
 	HAL_GPIO_WritePin(sugar_relay_GPIO_Port, sugar_relay_Pin, GPIO_PIN_RESET);
 	
 	if(DEBUG){
@@ -99,7 +105,7 @@ void heat_off(void){
 void heat_time(uint8_t s){
 	heat_on();
 	uint32_t ms = s * 1000;
-	HAL_Delay(ms);
+	osDelay(pdMS_TO_TICKS(ms));
 	heat_off();
 }
 
@@ -112,9 +118,9 @@ void heat_temp(){
 }
 
 void pour_out(void){
-	HAL_GPIO_WritePin(pour_relay_GPIO_Port,pour_relay_Pin, GPIO_PIN_RESET);
-	osDelay(pdMS_TO_TICKS(10000));
 	HAL_GPIO_WritePin(pour_relay_GPIO_Port,pour_relay_Pin, GPIO_PIN_SET);
+	osDelay(pdMS_TO_TICKS(20000));
+	HAL_GPIO_WritePin(pour_relay_GPIO_Port,pour_relay_Pin, GPIO_PIN_RESET);
 	
 }
 

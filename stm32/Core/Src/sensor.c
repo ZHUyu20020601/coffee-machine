@@ -1,19 +1,11 @@
 #include "includes.h"
 
+//filter size
+const static int average_span = 50;
 
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
-
 extern TIM_HandleTypeDef htim6;
-
-extern UART_HandleTypeDef huart2;
-
-const static int average_span = 50;
-//uint8_t md_rxbuf[MOD_RX_BUF_MAX];
-extern uint8_t rx_buffer_2[200];
-//uint16_t md_rxcnt = 0;
-extern uint8_t rx_len_2;
-
 extern onewire tempSensor;
 
 float get_coffee_dist(void){
@@ -139,9 +131,8 @@ float distance(uint32_t us){
 
 float read_temp(void){
 	//ds18b20
-	
 	float temp = ds18b20_readtemperature(&tempSensor) / 100.0;
-	while(temp > 100){
+	while(temp > 100 || temp < 23){//ignore unvalidate data
 		temp = ds18b20_readtemperature(&tempSensor) / 100.0;
 		osDelay(pdMS_TO_TICKS(10));
 	}
@@ -166,7 +157,7 @@ int ds18b20_readtemperature(onewire *ptr){
 	onewire_reset(ptr);
 	onewire_writebyte(ptr, 0xcc);//read serial
 	onewire_writebyte(ptr, 0x44);//enable temperature
-	HAL_Delay(800);
+	osDelay(800);
 	onewire_reset(ptr);
 	onewire_writebyte(ptr, 0xcc);
 	onewire_writebyte(ptr, 0xbe);
@@ -181,12 +172,14 @@ int ds18b20_readtemperature(onewire *ptr){
 /* External functions --------------------------------------------------------*/
 
 
+
 /**
  *  发送命令
  *  @param cmd  命令
  *  @param data 参数内容
  *  @param len  参数长度
  */
+/*
 void UartSendCmd(uint8_t cmd, uint8_t *parg, uint8_t len) {
   uint8_t chk = 0, i, buf[16];
 
@@ -213,7 +206,7 @@ void UartSendCmd(uint8_t cmd, uint8_t *parg, uint8_t len) {
   HAL_UART_Transmit(&huart2, buf, 6 + len, 1000);
   //HAL_UART_Transmit_DMA(&huart2, buf, 6+len);
 }
-
+*/
 
 /**
  * @brief 读传感器温度
@@ -222,6 +215,7 @@ void UartSendCmd(uint8_t cmd, uint8_t *parg, uint8_t len) {
  * @param pamb 返回环境温度
  * @return uint8_t 返回测温结果，1为物温，2为体温，0为无应答
  */
+ /*
 uint8_t UartReadTemp(int16_t *pobj, int16_t *pamb) {
   uint8_t type = 0;
 
@@ -241,26 +235,31 @@ uint8_t UartReadTemp(int16_t *pobj, int16_t *pamb) {
 
   return type;
 }
+*/
 
 /**
  * @brief 设置测量模式
  *
  * @param mode 1为物温，2为体温
  */
+ /*
 void UartSetTempMode(uint8_t mode) {
   uint8_t arg = mode;
   UartSendCmd(0x02, &arg, 1);
 }
+*/
 
 
 /**
  * @brief 设定模块通信方式
  *
  */
+ /*
 void UartSetCommType(uint8_t type) {
   uint8_t arg = type;
   UartSendCmd(0x05, &arg, 1);
 }
+*/
 
 
 

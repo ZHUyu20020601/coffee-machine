@@ -11,9 +11,9 @@ SystemCfg environmentCfg = {0, 0, 0, 0};
 void InitSystem(void){
 	SetStatusWaiting();
 	InitCfg(&SystemCurrentCfg);
-	InitCfg(&tempCfg);
-
-	InitCfg(&environmentCfg);
+	InitEnviCfg(&tempCfg);
+	InitEnviCfg(&environmentCfg);
+	
 	if(!DEBUG)
 		HAL_GPIO_WritePin(led_GPIO_Port, led_Pin, GPIO_PIN_SET);
 	else
@@ -27,6 +27,13 @@ void InitCfg(SystemCfg* cfg){
 	cfg->milk = 0;
 	cfg->sugar = 0;
 	cfg->temp = 0;
+}
+
+void InitEnviCfg(SystemCfg* cfg){
+	cfg->coffee = 50;
+	cfg->milk = 50;
+	cfg->sugar = 50;
+	cfg->temp = 30;
 }
 
 
@@ -64,9 +71,6 @@ char* SetCurrentCfg(void){
 	//如果处于等待状态，直接读取
 	if(Waiting == GetSystemStatus()){
 		SystemCurrentCfg = tempCfg;
-	}
-	else{
-		return "ERROR";
 	}
 	//如果处于工作状态则什么都不做
 	return NULL;

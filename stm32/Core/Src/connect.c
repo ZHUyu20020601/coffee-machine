@@ -7,41 +7,26 @@ extern DMA_HandleTypeDef hdma_usart3_tx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 
 extern uint8_t send_buf[200];
-
 extern int DEBUG;
 
 
+//data buffer
+//usage seen in stm32fxx_it.c
+uint8_t rx_buffer[200];   //receiving buffer
+volatile uint8_t rx_len = 0; //received data length
 
-uint8_t rx_buffer[200];   //接收数据的数组
-uint8_t rx_log[50];   //日志数组
-volatile uint8_t rx_len = 0; //接收数据的长度
-volatile uint8_t recv_end_flag = 0; //接收结束标志位
-
-uint8_t rx_buffer_2[200];   //接收数据的数组
-uint8_t rx_log_2[50];   //日志数组
-volatile uint8_t rx_len_2 = 0; //接收数据的长度
-volatile uint8_t recv_end_flag_2 = 0; //接收结束标志位
-
-//for usart3
-uint8_t rx_buffer_3[200];   //接收数据的数组
-uint8_t rx_log_3[50];   //日志数组
-volatile uint8_t rx_len_3 = 0; //接收数据的长度
-volatile uint8_t recv_end_flag_3 = 0; //接收结束标志位
+uint8_t rx_buffer_3[200];   //receiving buffer
+volatile uint8_t rx_len_3 = 0; //received data length
 
 
 
-
-//开启uart1 DMA收发
+//restart DMA receive
 void uart1_start_dma(void){
-	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);//开启DMA
-}
-
-void uart2_start_dma(void){
-	HAL_UART_Receive_DMA(&huart2,rx_buffer_2,200);//开启DMA
+	HAL_UART_Receive_DMA(&huart1,rx_buffer,200);
 }
 
 void uart3_start_dma(void){
-	HAL_UART_Receive_DMA(&huart3,rx_buffer_3,200);//开启DMA
+	HAL_UART_Receive_DMA(&huart3,rx_buffer_3,200);
 }
 
 
@@ -49,7 +34,9 @@ void uart3_start_dma(void){
 
 /*
 FUNCTION:
+通信的核心函数
 解析收到的对象，作相应的操作
+将会在stm32f1xx_if.c中断文件中被调用
 
 ATTENTION:
 1.中断函数中不能写printf和malloc
@@ -58,8 +45,6 @@ ATTENTION:
 
 void parse_msg(uint8_t* msg){
 	
-	
-		
 	cJSON* obj = cJSON_Parse((char*)msg);//解析对象
 	
 	char* type = cJSON_GetObjectItem(obj, "type")->valuestring;//分析命令类型
@@ -141,9 +126,9 @@ void req_cfg(char* variable, uint8_t id){
 
 void start(uint8_t id){
 	
-	//为防止连续两次执行start，放在if中
+	//prevent replicate execute
 	if(GetSystemStatus() != Making){
-	//读取队列中的参数
+	//read configuration from buf
 		char* msg = SetCurrentCfg();
 	
 		if(msg != NULL){
@@ -172,7 +157,7 @@ void emergent_stop(uint8_t id){
 
 
 
-/*----返回----*/
+/*----call back----*/
 void response_ok(uint8_t id){
 
 	cJSON* cjson = cJSON_CreateObject();

@@ -65,10 +65,6 @@ void HAL_Delay_us(uint32_t us);
 #define coffee_echo_GPIO_Port GPIOC
 #define milk_trigger_Pin GPIO_PIN_1
 #define milk_trigger_GPIO_Port GPIOA
-#define temp_transmit_Pin GPIO_PIN_2
-#define temp_transmit_GPIO_Port GPIOA
-#define temp_receive_Pin GPIO_PIN_3
-#define temp_receive_GPIO_Port GPIOA
 #define milk_echo_Pin GPIO_PIN_4
 #define milk_echo_GPIO_Port GPIOA
 #define sugar_trigger_Pin GPIO_PIN_5

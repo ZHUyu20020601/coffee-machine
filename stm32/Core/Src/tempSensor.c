@@ -17,16 +17,6 @@ void onewire_writebyte(onewire *ptr, unsigned char data){
 	unsigned char i;
 	for(i = 8;i > 0;i--){
 		onewire_setmode(ptr, 1);
-		//HAL_GPIO_WritePin(ptr->gpiox, ptr->pin, GPIO_PIN_RESET);//write bit 0
-		//delay_us(2);
-		//if(data & 1){
-		//	HAL_GPIO_WritePin(ptr->gpiox, ptr->pin, GPIO_PIN_SET);//write bit 1
-		//}
-		//else{
-		//	HAL_GPIO_WritePin(ptr->gpiox, ptr->pin, GPIO_PIN_RESET);
-		//}
-		//delay_us(60);
-		//HAL_GPIO_WritePin(ptr->gpiox, ptr->pin, GPIO_PIN_SET);
 		if(data & 1){//write 1
 			HAL_GPIO_WritePin(ptr->gpiox, ptr->pin, GPIO_PIN_RESET);
 			HAL_Delay_us(6);

@@ -6,6 +6,9 @@
 
 void shut_all_relay(void);
 
+float dist_to_vol(float dist);
+float vol_to_dist(float dist);
+
 //add V ml ingredient
 void add_coffee(uint8_t ml);
 void add_milk(uint8_t ml);

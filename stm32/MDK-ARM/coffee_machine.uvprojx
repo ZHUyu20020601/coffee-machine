@@ -423,11 +423,6 @@
               <FilePath>..\Core\Src\sys.c</FilePath>
             </File>
             <File>
-              <FileName>sys.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Inc\sys.h</FilePath>
-            </File>
-            <File>
               <FileName>connect.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\connect.c</FilePath>
@@ -453,6 +448,11 @@
               <FilePath>..\Core\Inc\tempSensor.h</FilePath>
             </File>
             <File>
+              <FileName>sys.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\sys.h</FilePath>
+            </File>
+            <File>
               <FileName>tempSensor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\tempSensor.c</FilePath>
@@ -471,6 +471,11 @@
               <FileName>Kalman_Filter.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\Kalman_Filter.c</FilePath>
+            </File>
+            <File>
+              <FileName>includes.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\includes.h</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>
@@ -771,11 +776,6 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
-            </File>
-            <File>
-              <FileName>includes.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Inc\includes.h</FilePath>
             </File>
           </Files>
         </Group>

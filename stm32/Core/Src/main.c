@@ -46,12 +46,17 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+
 //when 'DEBUG = 1' debug mode is on
 //in debug mode, transmission(printf) is via uart1, else via uart3
-int DEBUG = 1;
+int DEBUG = 0;
 uint8_t send_buf[200];
 
-//温度传感器模块结构体
+//buffers used for receive data
+extern uint8_t rx_buffer[200];   
+extern uint8_t rx_buffer_3[200];
+
+//temperature sensor onewire decleration
 onewire tempSensor = {GPIOC,GPIO_PIN_12};
 /* USER CODE END PV */
 
@@ -65,10 +70,7 @@ void MX_FREERTOS_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-//buffers used for receive data
-extern uint8_t rx_buffer[200];   
-extern uint8_t rx_buffer_2[200];
-extern uint8_t rx_buffer_3[200];
+
 /* USER CODE END 0 */
 
 /**
@@ -102,17 +104,14 @@ int main(void)
   MX_DMA_Init();
   MX_TIM4_Init();
   MX_USART3_UART_Init();
-  MX_USART2_UART_Init();
   MX_USART1_UART_Init();
   MX_TIM6_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 	
+	//enable uart_it_idle for receiving various length of data 
 	__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  
 	HAL_UART_Receive_DMA(&huart1,rx_buffer,200); 
-	
-	__HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);  
-	HAL_UART_Receive_DMA(&huart2,rx_buffer_2,200);  
 	
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);  
 	HAL_UART_Receive_DMA(&huart3,rx_buffer_3,200);  
@@ -122,9 +121,7 @@ int main(void)
 	shut_all_relay();
 	//init system config and buffers
 	InitSystem();
-	//uart-temperature init
-	UartSetCommType(1);//use uart
-	UartSetTempMode(2);//use object temp
+
 	
 	
   /* USER CODE END 2 */

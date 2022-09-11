@@ -59,12 +59,9 @@ extern int DEBUG;
 extern TIM_HandleTypeDef htim4;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
-extern DMA_HandleTypeDef hdma_usart2_rx;
-extern DMA_HandleTypeDef hdma_usart2_tx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 extern DMA_HandleTypeDef hdma_usart3_tx;
 extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 extern TIM_HandleTypeDef htim1;
 
@@ -236,34 +233,6 @@ void DMA1_Channel5_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles DMA1 channel6 global interrupt.
-  */
-void DMA1_Channel6_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Channel6_IRQn 0 */
-
-  /* USER CODE END DMA1_Channel6_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_usart2_rx);
-  /* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
-
-  /* USER CODE END DMA1_Channel6_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMA1 channel7 global interrupt.
-  */
-void DMA1_Channel7_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Channel7_IRQn 0 */
-
-  /* USER CODE END DMA1_Channel7_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_usart2_tx);
-  /* USER CODE BEGIN DMA1_Channel7_IRQn 1 */
-
-  /* USER CODE END DMA1_Channel7_IRQn 1 */
-}
-
-/**
   * @brief This function handles TIM1 update interrupt.
   */
 void TIM1_UP_IRQHandler(void)
@@ -308,18 +277,13 @@ void USART1_IRQHandler(void)
 		__HAL_UART_CLEAR_IDLEFLAG(&huart1);//clear status flag
 		HAL_UART_DMAStop(&huart1);
 		uint8_t temp=__HAL_DMA_GET_COUNTER(&hdma_usart1_rx);    
-		rx_len =200-temp; //calcult data length
+		rx_len =200-temp; //calculate data length
 		
-		/*
-		in both modes this function will analyse msg
-		only in debug mode will the led blink
-		
-		*/
 		if(DEBUG){
 			//send back
 			switch_led();
+			parse_msg(rx_buffer);
 		}
-		parse_msg(rx_buffer);
 		
 		uart1_start_dma();
 	 }
@@ -327,31 +291,7 @@ void USART1_IRQHandler(void)
   /* USER CODE END USART1_IRQn 1 */
 }
 
-/**
-  * @brief This function handles USART3 global interrupt.
-  */
-void USART2_IRQHandler(void)
-{
-  /* USER CODE BEGIN USART3_IRQn 0 */
 
-  /* USER CODE END USART3_IRQn 0 */
-  HAL_UART_IRQHandler(&huart3);
-  /* USER CODE BEGIN USART3_IRQn 1 */
-
-	uint8_t tmp_flag =__HAL_UART_GET_FLAG(&huart2,UART_FLAG_IDLE); //get idle status
-	if((tmp_flag != RESET))//determine whether transmission is finished
-	{ 
-		__HAL_UART_CLEAR_IDLEFLAG(&huart2);//clear idle flag
-			
-		HAL_UART_DMAStop(&huart2); 
-			
-		uint8_t temp=__HAL_DMA_GET_COUNTER(&hdma_usart2_rx);    
-		rx_len_2 =200-temp; //calcult data length
-			
-		uart2_start_dma();
-
-	}
-}
 
 /**
   * @brief This function handles USART3 global interrupt.
@@ -375,15 +315,12 @@ void USART3_IRQHandler(void)
 			
 		rx_len_3 =200-temp; 
 		
-		/*
-		if not in DEBUG, led will switch when uart3 receive something
-		*/
 		
-		if(!DEBUG)
+		if(!DEBUG){
 			switch_led();
-		//analyse received msg
-		parse_msg(rx_buffer_3);
-			
+			parse_msg(rx_buffer_3);
+		}
+		
 		uart3_start_dma();
 
 	}

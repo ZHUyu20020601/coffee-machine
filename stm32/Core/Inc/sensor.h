@@ -27,11 +27,11 @@ float read_temp(void);
 int ds18b20_readtemperature(onewire *ptr);
 
 //void MoudleUartRecNew(uint8_t ch);
-void UartSendCmd(uint8_t cmd, uint8_t *parg, uint8_t len);
-uint8_t UartReadTemp(int16_t *pobj, int16_t *pamb);
-void UartSetTempMode(uint8_t mode);
+//void UartSendCmd(uint8_t cmd, uint8_t *parg, uint8_t len);
+//uint8_t UartReadTemp(int16_t *pobj, int16_t *pamb);
+//void UartSetTempMode(uint8_t mode);
 //void UartTempCalibLow(void);
 //void UartTempCalibHigh(void);
-void UartSetCommType(uint8_t type);
+//void UartSetCommType(uint8_t type);
 
 #endif

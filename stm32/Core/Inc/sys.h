@@ -42,11 +42,12 @@ typedef struct {
 	uint8_t temp;	// 设定的加热温度
 } SystemCfg;
 
+/*
 typedef struct {
 	SystemCfg buffer[5]; //存储5杯咖啡的预设
 	int rear; //标记下一个可以填入的空位
 }	SystemCfgBuf;
-
+*/
 
 /*状态函数*/
 
@@ -75,6 +76,8 @@ uint8_t GetCurrentCfg(cfg_property);
 uint8_t GetNextCfg(cfg_property);
 uint8_t GetTempCfg(cfg_property);
 uint8_t GetEnviCfg(cfg_property);
+
+void InitEnviCfg(SystemCfg* cfg);
 
 #endif
 
