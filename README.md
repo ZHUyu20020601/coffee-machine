@@ -9,9 +9,10 @@ Contributors: Zhu Yu, Shen Junyi, Song Mengxuan
 ### 1.1外观成果
 
 <div>
-    <img src="./doc/1.jpg" style="height:360px;width:240px;position:realtive;left:50%;top:50%;transform:translate(60%,0)">
-    <img src="./doc/2.jpg" style="height:360px;width:240px;position:relative;left:50%;top:50%;transform:translate(-100%,0)">
+    <img src="./doc/1.jpg" style="height:360px;width:240px;position:relative;left:50%;transform:translate(-100%,0);">
+    <img src="./doc/2.jpg" style="height:360px;width:240px;position:relative;left:50%;transform:translate(-100%,0);">
 </div>
+
 
 
 
